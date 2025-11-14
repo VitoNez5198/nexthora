@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fuente Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <title>{% block title %}Nexthora{% endblock %}</title>
+
+    <script>
+        // Configuración de Tailwind (opcional, para extender colores)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#3B82F6', // Azul
+                        'secondary': '#10B981', // Verde
+                        'dark-gray': '#1F2937',
+                        'light-gray': '#F9FAFB',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-light-gray font-sans antialiased">
+
+    <!-- 
+      Aquí podríamos poner una barra de navegación (Navbar) 
+      que aparecería en todas las páginas del "Mundo 2" (Dashboard).
+      Por ahora, la dejamos limpia para el Login/Registro.
+    -->
+
+    <!-- El "Contenedor de Contenido" -->
+    <!-- Django buscará el bloque 'content' en los archivos hijos -->
+    <!-- y pondrá su contenido aquí. -->
+    <div class="container mx-auto mt-10 px-4">
+        {% block content %}
+        <!-- El contenido de register.html, login.html, etc., irá aquí -->
+        {% endblock %}
+    </div>
+
+</body>
+
+</html>
