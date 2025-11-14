@@ -1,64 +1,53 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib import messages # Para enviar mensajes de éxito o error
+from django.contrib.auth.decorators import login_required
+from .forms import NexthoraUserCreationForm # Importa el formulario que acabamos de crear
 
-# ¡Importante! Usaremos el formulario de creación de usuarios que Django
-# ya tiene listo, es más seguro y fácil.
-from .forms import NexthoraUserCreationForm # Crearemos este formulario en un momento*
-
-# ---
-# VISTA DE REGISTRO (MUNDO 2: PROFESIONAL)
-# ---
+# --- Vista de Registro ---
 def register_view(request):
     """
-    Maneja la lógica para la página de registro de un nuevo profesional.
+    Maneja la lógica para registrar un nuevo profesional.
     """
-    # Si el método es POST, significa que el usuario envió el formulario
     if request.method == 'POST':
-        # 1. Crea una instancia del formulario con los datos recibidos (request.POST)
+        # Si el formulario se envía (POST), procesa los datos
         form = NexthoraUserCreationForm(request.POST)
         
-        # 2. Django valida los datos (ej. email válido, contraseñas coinciden)
         if form.is_valid():
-            # 3. Si es válido, guarda el nuevo usuario en la BBDD
-            user = form.save() 
-            
-            # 4. (Opcional pero recomendado) Inicia sesión automáticamente
-            #    con el usuario que acabamos de crear.
-            login(request, user)
-            
-            # 5. Muestra un mensaje de éxito (lo podemos mostrar en el dashboard)
-            messages.success(request, "¡Tu cuenta ha sido creada con éxito!")
-            
-            # 6. Redirige al usuario a la página de "Dashboard"
-            #    (¡Esta URL 'dashboard' la crearemos después!)
+            # Si los datos son válidos (contraseñas coinciden, etc.):
+            user = form.save() # 1. Guarda el nuevo usuario en la BBDD
+            login(request, user) # 2. Inicia sesión automáticamente
+            # 3. Redirige al profesional a su nuevo Dashboard
             return redirect('dashboard') 
         else:
-            # 7. Si el formulario no es válido (ej. email ya existe),
-            #    vuelve a mostrar la página de registro CON los errores.
-            messages.error(request, "Hubo un error en tu registro. Por favor, revisa los campos.")
-            # (El 'form' ahora contiene los mensajes de error que se mostrarán en el HTML)
-
-    # Si el método es GET (el usuario solo está visitando la página)
+            # Si el formulario no es válido (ej. usuario ya existe),
+            # vuelve a mostrar la página con los errores.
+            return render(request, 'register.html', {'form': form})
+    
     else:
+        # Si es la primera vez que se carga la página (GET):
         # 1. Crea un formulario vacío
         form = NexthoraUserCreationForm()
+        # 2. Muestra la plantilla 'register.html'
+        return render(request, 'register.html', {'form': form})
 
-    # 2. Muestra la plantilla 'register.html' y le pasa el formulario
-    #    (ya sea vacío o con los errores)
-    return render(request, 'register.html', {'form': form})
-
-# ---
-# VISTA DE LOGIN (MUNDO 2: PROFESIONAL)
-# ---
+# --- Vista de Login (Placeholder) ---
 def login_view(request):
-    # (Esta la programaremos después, pero necesitamos la URL)
-    return render(request, 'login.html') # Asumimos que tienes 'login.html'
+    """
+    Placeholder para la vista de login.
+    (La programaremos después, pero la necesitamos para {% url 'login' %} )
+    """
+    # Por ahora, solo redirige al registro si intentan ir a /login/
+    # TODO: Reemplazar esto con el HTML de login.html
+    return redirect('register') 
 
-# ---
-# VISTA DE DASHBOARD (MUNDO 2: PROFESIONAL)
-# ---
+# --- Vista de Dashboard (Placeholder) ---
+@login_required # ¡Importante! Esta página requiere que el usuario esté logueado
 def dashboard_view(request):
-    # (Esta la programaremos después, pero necesitamos la URL)
-    return render(request, 'dashboard.html') # Asumimos que tienes 'dashboard.html'
+    """
+    Placeholder para el dashboard del profesional.
+    (La programaremos después, pero la necesitamos para la redirección)
+    """
+    # TODO: Reemplazar esto con el HTML de dashboard.html
+    # Por ahora, solo muestra un mensaje simple
+    from django.http import HttpResponse
+    return HttpResponse(f"¡Bienvenido a tu Dashboard, {request.user.username}!")
