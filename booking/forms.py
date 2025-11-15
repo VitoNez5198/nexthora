@@ -1,33 +1,29 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django import forms
+from django.forms import EmailField, forms
 
 class NexthoraUserCreationForm(UserCreationForm):
     """
-    Un formulario de creación de usuario personalizado que
-    exige el correo electrónico.
+    Un formulario personalizado para crear un usuario.
+    Hereda TODO de UserCreationForm (incluida la validación de 
+    contraseña, que usa un campo llamado 'password2').
+    
+    Nosotros solo le AÑADIMOS el campo 'email'.
     """
-    email = forms.EmailField(
+    email = EmailField(
         required=True, 
-        help_text="Requerido. Por favor, introduce un correo electrónico válido."
+        help_text="Requerido. Ingresa un email válido."
     )
 
     class Meta(UserCreationForm.Meta):
-        """
-        Le dice a Django que use nuestro modelo de Usuario y que
-        incluya los campos 'username', 'email', y las contraseñas.
-        """
         model = User
-        fields = ('username', 'email')
+        # Le decimos que use los campos del padre, MÁS el email.
+        fields = UserCreationForm.Meta.fields + ("email",)
 
     def save(self, commit=True):
-        """
-        Guarda el usuario y se asegura de que el email
-        se guarde correctamente.
-        """
+        # Sobrescribimos el 'save' para asegurar que el email se guarde
         user = super().save(commit=False)
-        # Aseguramos que el email del formulario se asigne al modelo
-        user.email = self.cleaned_data['email']
+        user.email = self.cleaned_data["email"]
         if commit:
             user.save()
         return user

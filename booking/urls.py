@@ -3,6 +3,9 @@ from . import views # ¡Importa la lógica de 'views.py'!
 
 # Este es el "mapa" del departamento de Booking
 urlpatterns = [
+    # --- ¡NUEVA RUTA DE INICIO! ---
+    # Cuando alguien visite la raíz (''), usa la 'index_view'.
+    path('', views.index_view, name='index'),
     # --- Rutas del Mundo 2 (Profesional) ---
     
     # Cuando alguien vaya a '.../register/', ejecuta la función 'register_view'.

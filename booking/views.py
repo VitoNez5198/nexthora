@@ -3,6 +3,14 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import NexthoraUserCreationForm # Importa el formulario que acabamos de crear
 
+# --- ¡NUEVA VISTA DE INICIO! ---
+def index_view(request):
+    """
+    Vista para la página de inicio (la raíz '/').
+    Por ahora, simplemente redirige a la página de registro.
+    """
+    return redirect('register') # Redirige a la URL con name='register'
+
 # --- Vista de Registro ---
 def register_view(request):
     """
