@@ -228,18 +228,25 @@ def get_available_slots(profile, service, check_date):
     current_time = datetime.combine(check_date, work_hours.start_time)
     end_work_time = datetime.combine(check_date, work_hours.end_time)
     
+    now = timezone.localtime(timezone.now())
     duration = timedelta(minutes=service.duration_minutes)
 
     while current_time + duration <= end_work_time:
         slot_end = current_time + duration
         
+        # --- VALIDACIÓN NUEVA: ¿Es una hora pasada? ---
+        # Si el día que revisamos es HOY, y la hora del bloque es menor a AHORA...
+        # ¡Saltamos este bloque!
+        if check_date == now.date() and current_time.time() < now.time():
+            current_time += duration
+            continue
         # Verificar colisiones
         is_taken = False
         for appt in existing_appointments:
             # Lógica de superposición simple
             # Si el slot empieza antes de que termine la cita Y termina después de que empiece la cita
-            appt_start = appt.start_datetime.replace(tzinfo=None) # Quitamos zona horaria para comparar simple
-            appt_end = appt.end_datetime.replace(tzinfo=None)
+            appt_start = timezone.localtime(appt.start_datetime).replace(tzinfo=None)
+            appt_end = timezone.localtime(appt.end_datetime).replace(tzinfo=None)
             
             if current_time < appt_end and slot_end > appt_start:
                 is_taken = True

@@ -12,13 +12,50 @@
             <h1 class="text-2xl font-bold text-dark-gray">Hola, {{ user.username }} 👋</h1>
             <p class="text-gray-600">Aquí está el resumen de tu negocio hoy.</p>
         </div>
-        <div class="mt-4 md:mt-0">
-            <a href="#" class="text-primary font-medium hover:underline flex items-center gap-2">
-                <!-- Icono de Ojo (Simulado con texto por ahora) -->
-                <span>👁️</span> Ver mi Perfil Público
-            </a>
+
+        <!-- SECCIÓN DEL LINK PÚBLICO -->
+        <div class="mt-4 md:mt-0 flex flex-col items-end">
+            <p class="text-xs text-gray-400 uppercase font-bold mb-1">Tu Link de Agendamiento</p>
+
+            <div class="flex items-center gap-2">
+                <!-- Input visible (solo lectura) -->
+                <div
+                    class="bg-gray-100 px-3 py-2 rounded text-sm text-gray-600 font-mono border border-gray-200 select-all">
+                    nexthora.com/{{ user.profile.slug }}
+                </div>
+
+                <!-- Botón de Copiar -->
+                <button onclick="copiarLink()" class="bg-primary text-white p-2 rounded hover:bg-blue-700 transition"
+                    title="Copiar Link">
+                    📋
+                </button>
+
+                <!-- Botón de Ver -->
+                <a href="{% url 'public_profile' user.profile.slug %}" target="_blank"
+                    class="bg-white border border-gray-300 text-gray-600 p-2 rounded hover:bg-gray-50 transition"
+                    title="Ver Página">
+                    👁️
+                </a>
+            </div>
+            <span id="copy-msg" class="text-xs text-green-600 mt-1 hidden">¡Copiado al portapapeles!</span>
         </div>
     </div>
+
+    <!-- Script simple para copiar -->
+    <script>
+        function copiarLink() {
+            // Construimos la URL completa
+            const url = window.location.origin + "{% url 'public_profile' user.profile.slug %}";
+
+            // Copiamos al portapapeles
+            navigator.clipboard.writeText(url).then(() => {
+                // Mostramos mensaje de éxito
+                const msg = document.getElementById('copy-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+            });
+        }
+    </script>
 
     <!-- TARJETAS DE ACCIÓN RÁPIDA -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
