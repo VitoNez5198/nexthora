@@ -8,51 +8,69 @@
     <!-- ENCABEZADO DE BIENVENIDA -->
     <div
         class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-        <div>
+        <div class="mb-4 md:mb-0">
             <h1 class="text-2xl font-bold text-dark-gray">Hola, {{ user.username }} 👋</h1>
             <p class="text-gray-600">Aquí está el resumen de tu negocio hoy.</p>
         </div>
 
         <!-- SECCIÓN DEL LINK PÚBLICO -->
-        <div class="mt-4 md:mt-0 flex flex-col items-end">
+        <div class="flex flex-col items-end">
             <p class="text-xs text-gray-400 uppercase font-bold mb-1">Tu Link de Agendamiento</p>
 
             <div class="flex items-center gap-2">
-                <!-- Input visible (solo lectura) -->
+                <!-- Input visible (solo lectura) para que el usuario vea su link -->
                 <div
                     class="bg-gray-100 px-3 py-2 rounded text-sm text-gray-600 font-mono border border-gray-200 select-all">
                     nexthora.com/{{ user.profile.slug }}
                 </div>
 
                 <!-- Botón de Copiar -->
-                <button onclick="copiarLink()" class="bg-primary text-white p-2 rounded hover:bg-blue-700 transition"
+                <button onclick="copiarLink()"
+                    class="bg-primary text-white p-2 rounded hover:bg-blue-700 transition shadow-sm"
                     title="Copiar Link">
-                    📋
+                    <!-- Icono simple de portapapeles -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
                 </button>
 
                 <!-- Botón de Ver -->
                 <a href="{% url 'public_profile' user.profile.slug %}" target="_blank"
-                    class="bg-white border border-gray-300 text-gray-600 p-2 rounded hover:bg-gray-50 transition"
-                    title="Ver Página">
-                    👁️
+                    class="bg-white border border-gray-300 text-gray-600 p-2 rounded hover:bg-gray-50 transition shadow-sm"
+                    title="Probar mi página">
+                    <!-- Icono de ojo -->
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
                 </a>
             </div>
-            <span id="copy-msg" class="text-xs text-green-600 mt-1 hidden">¡Copiado al portapapeles!</span>
+            <!-- Mensaje de confirmación oculto -->
+            <span id="copy-msg"
+                class="text-xs text-green-600 mt-1 font-medium opacity-0 transition-opacity duration-300">¡Link
+                copiado!</span>
         </div>
     </div>
 
-    <!-- Script simple para copiar -->
+    <!-- SCRIPT PARA COPIAR (JavaScript simple) -->
     <script>
         function copiarLink() {
-            // Construimos la URL completa
-            const url = window.location.origin + "{% url 'public_profile' user.profile.slug %}";
+            // Construimos la URL completa dinámicamente usando la URL actual del navegador
+            const baseUrl = window.location.origin;
+            const slugUrl = "{% url 'public_profile' user.profile.slug %}";
+            const fullUrl = baseUrl + slugUrl;
 
             // Copiamos al portapapeles
-            navigator.clipboard.writeText(url).then(() => {
+            navigator.clipboard.writeText(fullUrl).then(() => {
                 // Mostramos mensaje de éxito
                 const msg = document.getElementById('copy-msg');
-                msg.classList.remove('hidden');
-                setTimeout(() => msg.classList.add('hidden'), 2000);
+                msg.classList.remove('opacity-0');
+                setTimeout(() => msg.classList.add('opacity-0'), 2000);
             });
         }
     </script>

@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django import forms  # <--- CAMBIO IMPORTANTE AQUÍ
 from .models import Service
 from .models import BusinessHours # Asegúrate de importar el modelo
+from .models import Service, BusinessHours, TimeOff # Importa TimeOff
+
 
 
 class NexthoraUserCreationForm(UserCreationForm):
@@ -75,3 +77,25 @@ class BusinessHoursForm(forms.ModelForm):
 
         if start_time and end_time and start_time >= end_time:
             raise forms.ValidationError("La hora de fin debe ser posterior a la hora de inicio.")
+
+class TimeOffForm(forms.ModelForm):
+    class Meta:
+        model = TimeOff
+        fields = ['start_date', 'end_date', 'description']
+        widgets = {
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary'}),
+            'description': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary', 'placeholder': 'Ej: Vacaciones'}),
+        }
+        labels = {
+            'start_date': 'Desde',
+            'end_date': 'Hasta',
+            'description': 'Motivo (Opcional)',
+        }
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("start_date")
+        end = cleaned_data.get("end_date")
+        if start and end and start > end:
+            raise forms.ValidationError("La fecha de fin no puede ser anterior al inicio.")

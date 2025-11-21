@@ -42,4 +42,6 @@ urlpatterns = [
     # Captura cualquier texto (slug) y busca un perfil.
     # Ej: nexthora.com/peluqueria-cool -> profile_slug="peluqueria-cool"
     path('<slug:profile_slug>/', views.profile_view, name='public_profile'),
+    
+    path('dashboard/schedule/delete-off/<int:timeoff_id>/', views.delete_timeoff_view, name='delete_timeoff'),
 ]

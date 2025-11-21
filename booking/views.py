@@ -1,36 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages  # ¡Faltaba esto!
+from django.contrib import messages
 from django.http import HttpResponse
-
-from .forms import NexthoraUserCreationForm, ServiceForm
-from .models import Service, ProfessionalProfile
-
-from .forms import BusinessHoursForm # ¡Importa el nuevo form!
-from .models import BusinessHours # ¡Importa el modelo!
-
-
-from .models import Appointment
 from django.utils import timezone
-
 from datetime import datetime, timedelta, date, time
+
+# Importación de Formularios y Modelos
+from .forms import NexthoraUserCreationForm, ServiceForm, BusinessHoursForm, TimeOffForm
+from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
 # --- VISTA DE INICIO ---
 def index_view(request):
-    """
-    Vista para la página de inicio (la raíz '/').
-    Por ahora, simplemente redirige a la página de registro o dashboard.
-    """
     if request.user.is_authenticated:
         return redirect('dashboard')
     return redirect('register')
 
 # --- VISTA DE REGISTRO ---
 def register_view(request):
-    """
-    Maneja la lógica para registrar un nuevo profesional.
-    """
     if request.method == 'POST':
         form = NexthoraUserCreationForm(request.POST)
         if form.is_valid():
@@ -47,63 +34,47 @@ def register_view(request):
 
 # --- VISTA DE LOGIN (Placeholder) ---
 def login_view(request):
-    """
-    Placeholder para login. Redirige a registro por ahora.
-    """
     return redirect('register') 
 
 # --- VISTA DE DASHBOARD ---
 @login_required
 def dashboard_view(request):
-    """
-    Vista principal del Dashboard.
-    """
     return render(request, 'dashboard.html')
 
-# --- VISTA: GESTIONAR SERVICIOS ---
+# --- GESTIÓN DE SERVICIOS ---
 @login_required
 def services_view(request):
-    # Intentamos obtener el perfil. Si falla, redirigimos (seguridad).
     try:
         profile = request.user.profile
     except ProfessionalProfile.DoesNotExist:
-        messages.error(request, "Error: Tu usuario no tiene un perfil profesional asociado.")
+        messages.error(request, "Error: Perfil no encontrado.")
         return redirect('dashboard')
 
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
             service = form.save(commit=False)
-            service.professional = profile # Asignamos el servicio al profesional actual
+            service.professional = profile
             service.save()
             messages.success(request, "¡Servicio creado con éxito!")
             return redirect('services')
         else:
-            messages.error(request, "Error al crear el servicio. Revisa el formulario.")
+            messages.error(request, "Error al crear el servicio.")
     else:
         form = ServiceForm()
 
-    # Listar solo los servicios de ESTE profesional
     services = Service.objects.filter(professional=profile)
+    return render(request, 'services.html', {'form': form, 'services': services})
 
-    return render(request, 'services.html', {
-        'form': form,
-        'services': services
-    })
-
-# --- VISTA: ELIMINAR SERVICIO ---
 @login_required
 def delete_service_view(request, service_id):
-    # Obtenemos el servicio solo si pertenece al usuario actual (seguridad)
     service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
-    
     if request.method == 'POST':
         service.delete()
-        messages.success(request, "Servicio eliminado correctamente.")
-        
+        messages.success(request, "Servicio eliminado.")
     return redirect('services')
 
-# --- VISTA: GESTIONAR HORARIOS ---
+# --- GESTIÓN DE HORARIOS ---
 @login_required
 def schedule_view(request):
     try:
@@ -111,43 +82,59 @@ def schedule_view(request):
     except:
         return redirect('dashboard')
 
-    if request.method == 'POST':
-        form = BusinessHoursForm(request.POST)
-        if form.is_valid():
-            hours = form.save(commit=False)
-            hours.professional = profile
-            try:
-                hours.save()
-                messages.success(request, "¡Horario añadido correctamente!")
-                return redirect('schedule')
-            except Exception as e:
-                # Captura error de duplicados (unique_together en models.py)
-                messages.error(request, "Error: Ya existe un horario idéntico para este día.")
-        else:
-            messages.error(request, "Error en el horario. Revisa que la hora fin sea mayor a la inicio.")
-    else:
-        form = BusinessHoursForm()
+    # Instanciamos ambos formularios
+    hours_form = BusinessHoursForm(prefix='hours')
+    timeoff_form = TimeOffForm(prefix='off')
 
-    # Obtener horarios ordenados por día y hora
+    if request.method == 'POST':
+        if 'submit_hours' in request.POST:
+            hours_form = BusinessHoursForm(request.POST, prefix='hours')
+            if hours_form.is_valid():
+                hours = hours_form.save(commit=False)
+                hours.professional = profile
+                try:
+                    hours.save()
+                    messages.success(request, "Horario recurrente añadido.")
+                    return redirect('schedule')
+                except:
+                    messages.error(request, "Error: Horario duplicado.")
+        
+        elif 'submit_off' in request.POST:
+            timeoff_form = TimeOffForm(request.POST, prefix='off')
+            if timeoff_form.is_valid():
+                off = timeoff_form.save(commit=False)
+                off.professional = profile
+                off.save()
+                messages.success(request, "Días bloqueados correctamente.")
+                return redirect('schedule')
+
     schedule = BusinessHours.objects.filter(professional=profile).order_by('weekday', 'start_time')
+    time_off_list = TimeOff.objects.filter(professional=profile).order_by('start_date')
 
     return render(request, 'schedule.html', {
-        'form': form,
-        'schedule': schedule
+        'hours_form': hours_form,
+        'timeoff_form': timeoff_form,
+        'schedule': schedule,
+        'time_off_list': time_off_list
     })
 
-# --- VISTA: ELIMINAR HORARIO ---
 @login_required
 def delete_schedule_view(request, schedule_id):
     hours = get_object_or_404(BusinessHours, id=schedule_id, professional=request.user.profile)
-    
     if request.method == 'POST':
         hours.delete()
         messages.success(request, "Bloque de horario eliminado.")
-        
     return redirect('schedule')
 
-# --- VISTA: VER AGENDA ---
+@login_required
+def delete_timeoff_view(request, timeoff_id):
+    off = get_object_or_404(TimeOff, id=timeoff_id, professional=request.user.profile)
+    if request.method == 'POST':
+        off.delete()
+        messages.success(request, "Bloqueo eliminado.")
+    return redirect('schedule')
+
+# --- VER AGENDA ---
 @login_required
 def appointments_view(request):
     try:
@@ -155,13 +142,11 @@ def appointments_view(request):
     except:
         return redirect('dashboard')
 
-    # Obtener citas futuras ordenadas por fecha
     upcoming_appointments = Appointment.objects.filter(
         professional=profile,
         start_datetime__gte=timezone.now()
     ).order_by('start_datetime')
 
-    # Obtener citas pasadas (opcional, para historial)
     past_appointments = Appointment.objects.filter(
         professional=profile,
         start_datetime__lt=timezone.now()
@@ -172,108 +157,89 @@ def appointments_view(request):
         'past_appointments': past_appointments
     })
 
-
-# --- VISTA PÚBLICA: PERFIL DEL PROFESIONAL ---
-# Nota: ¡No usamos @login_required aquí! Es pública.
-def profile_view(request, profile_slug):
-    # 1. Buscar al profesional por su URL personalizada (slug)
-    # Si no existe, muestra un error 404 automáticamente.
-    profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
-    
-    # 2. Obtener sus servicios ACTIVOS
-    services = Service.objects.filter(professional=profile, is_active=True)
-    
-    # 3. Renderizar la plantilla pública
-    return render(request, 'profile.html', {
-        'profile': profile,
-        'services': services
-    })
-
-# --- VISTA PÚBLICA: PERFIL DEL PROFESIONAL ---
-# Nota: ¡No usamos @login_required aquí! Es pública.
-def profile_view(request, profile_slug):
-    # 1. Buscar al profesional por su URL personalizada (slug)
-    # Si no existe, Django mostrará automáticamente un error 404.
-    profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
-    
-    # 2. Obtener sus servicios ACTIVOS
-    services = Service.objects.filter(professional=profile, is_active=True)
-    
-    # 3. Renderizar la plantilla pública
-    return render(request, 'profile.html', {
-        'profile': profile,
-        'services': services
-    })
-    
 # --- HELPER: CALCULAR SLOTS DISPONIBLES ---
 def get_available_slots(profile, service, check_date):
     """
-    Genera una lista de horas disponibles para un día específico.
+    Calcula horas disponibles validando:
+    1. Días bloqueados (TimeOff)
+    2. Horario laboral (BusinessHours)
+    3. Citas existentes (Appointment)
+    4. Horas pasadas (si es hoy)
     """
-    # 1. Obtener el horario de trabajo para ese día de la semana (0=Lunes, 6=Domingo)
+    
+    # 1. VALIDACIÓN TimeOff (Días Bloqueados)
+    is_blocked = TimeOff.objects.filter(
+        professional=profile,
+        start_date__lte=check_date, 
+        end_date__gte=check_date
+    ).exists()
+    
+    if is_blocked:
+        return [] # Día bloqueado por vacaciones/excepción
+
+    # 2. Obtener horario laboral
     weekday = check_date.weekday()
     try:
         work_hours = BusinessHours.objects.get(professional=profile, weekday=weekday)
     except BusinessHours.DoesNotExist:
-        return [] # No trabaja este día
+        return [] # No trabaja este día de la semana
 
-    # 2. Obtener todas las citas YA agendadas para ese día
+    # 3. Obtener citas existentes
     existing_appointments = Appointment.objects.filter(
         professional=profile,
         start_datetime__date=check_date
     )
 
-    # 3. Generar slots
+    # 4. Generar slots
     slots = []
     current_time = datetime.combine(check_date, work_hours.start_time)
     end_work_time = datetime.combine(check_date, work_hours.end_time)
-    
     now = timezone.localtime(timezone.now())
     duration = timedelta(minutes=service.duration_minutes)
 
     while current_time + duration <= end_work_time:
+        slot_start = current_time
         slot_end = current_time + duration
         
-        # --- VALIDACIÓN NUEVA: ¿Es una hora pasada? ---
-        # Si el día que revisamos es HOY, y la hora del bloque es menor a AHORA...
-        # ¡Saltamos este bloque!
-        if check_date == now.date() and current_time.time() < now.time():
+        # Validar hora pasada (si es hoy)
+        if check_date == now.date() and slot_start.time() < now.time():
             current_time += duration
             continue
-        # Verificar colisiones
+
+        # Validar colisión con citas
         is_taken = False
         for appt in existing_appointments:
-            # Lógica de superposición simple
-            # Si el slot empieza antes de que termine la cita Y termina después de que empiece la cita
             appt_start = timezone.localtime(appt.start_datetime).replace(tzinfo=None)
             appt_end = timezone.localtime(appt.end_datetime).replace(tzinfo=None)
             
-            if current_time < appt_end and slot_end > appt_start:
+            if slot_start < appt_end and slot_end > appt_start:
                 is_taken = True
                 break
         
         if not is_taken:
-            slots.append(current_time.time()) # Guardamos solo la hora
+            slots.append(current_time.time())
 
-        # Avanzamos al siguiente bloque (ej. cada 30 min o duración del servicio)
-        # Para simplificar MVP, avanzamos según la duración del servicio
         current_time += duration 
 
     return slots
 
-# --- VISTA PASO 1: ELEGIR FECHA Y HORA ---
+# --- VISTA PÚBLICA: PERFIL ---
+def profile_view(request, profile_slug):
+    profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
+    services = Service.objects.filter(professional=profile, is_active=True)
+    return render(request, 'profile.html', {'profile': profile, 'services': services})
+
+# --- VISTA PÚBLICA: RESERVAR ---
 def booking_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
     service = get_object_or_404(Service, id=service_id, professional=profile)
     
-    # Obtener fecha seleccionada (o hoy por defecto)
     date_str = request.GET.get('date')
     if date_str:
         selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
     else:
         selected_date = date.today()
 
-    # Calcular slots
     available_slots = get_available_slots(profile, service, selected_date)
 
     return render(request, 'booking.html', {
@@ -283,26 +249,22 @@ def booking_view(request, profile_slug, service_id):
         'available_slots': available_slots
     })
 
-# --- VISTA PASO 2: CONFIRMAR Y GUARDAR ---
+# --- VISTA PÚBLICA: CONFIRMAR ---
 def booking_confirm_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
     service = get_object_or_404(Service, id=service_id, professional=profile)
     
-    # Obtener datos de la URL (fecha y hora elegida)
     date_str = request.GET.get('date')
     time_str = request.GET.get('time')
     
     if request.method == 'POST':
-        # Crear la cita
         client_name = request.POST.get('client_name')
         client_email = request.POST.get('client_email')
         client_phone = request.POST.get('client_phone')
         
-        # Construir el datetime final
         start_datetime_str = f"{date_str} {time_str}"
         start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M')
         
-        # Guardar en BBDD (Capturamos el objeto en una variable 'appointment')
         appointment = Appointment.objects.create(
             professional=profile,
             service=service,
@@ -312,11 +274,7 @@ def booking_confirm_view(request, profile_slug, service_id):
             start_datetime=start_datetime
         )
         
-        # Pasamos 'appointment' a la plantilla en lugar de solo 'service'
-        return render(request, 'success.html', {
-            'service': service, 
-            'appointment': appointment
-        })
+        return render(request, 'success.html', {'service': service, 'appointment': appointment})
 
     return render(request, 'booking_confirm.html', {
         'profile': profile,

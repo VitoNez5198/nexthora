@@ -172,3 +172,16 @@ class Appointment(models.Model):
     
     class Meta:
         ordering = ['start_datetime']
+
+class TimeOff(models.Model):
+    """
+    Representa días o rangos de fechas en los que el profesional NO trabaja,
+    independientemente de su horario recurrente.
+    """
+    professional = models.ForeignKey(ProfessionalProfile, on_delete=models.CASCADE, related_name="time_off")
+    start_date = models.DateField(help_text="Fecha de inicio del bloqueo")
+    end_date = models.DateField(help_text="Fecha de fin del bloqueo (puede ser la misma que inicio)")
+    description = models.CharField(max_length=100, blank=True, help_text="Ej: Vacaciones, Médico, Feriado")
+
+    def __str__(self):
+        return f"{self.professional} off: {self.start_date} - {self.end_date}"
