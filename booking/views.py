@@ -169,3 +169,20 @@ def appointments_view(request):
         'upcoming_appointments': upcoming_appointments,
         'past_appointments': past_appointments
     })
+
+
+# --- VISTA PÚBLICA: PERFIL DEL PROFESIONAL ---
+# Nota: ¡No usamos @login_required aquí! Es pública.
+def profile_view(request, profile_slug):
+    # 1. Buscar al profesional por su URL personalizada (slug)
+    # Si no existe, muestra un error 404 automáticamente.
+    profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
+    
+    # 2. Obtener sus servicios ACTIVOS
+    services = Service.objects.filter(professional=profile, is_active=True)
+    
+    # 3. Renderizar la plantilla pública
+    return render(request, 'profile.html', {
+        'profile': profile,
+        'services': services
+    })

@@ -30,4 +30,9 @@ urlpatterns = [
     # --- GESTIÓN DE CITAS (AGENDA) ---
     # CAMBIO: Ahora apunta a 'views.appointments_view' en vez de 'dashboard_view'
     path('dashboard/appointments/', views.appointments_view, name='appointments'),
+    
+    # --- RUTA PÚBLICA (¡SIEMPRE AL FINAL!) ---
+    # Captura cualquier texto (slug) y busca un perfil.
+    # Ej: nexthora.com/peluqueria-cool -> profile_slug="peluqueria-cool"
+    path('<slug:profile_slug>/', views.profile_view, name='public_profile'),
 ]
