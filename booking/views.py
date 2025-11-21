@@ -295,8 +295,8 @@ def booking_confirm_view(request, profile_slug, service_id):
         start_datetime_str = f"{date_str} {time_str}"
         start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M')
         
-        # Guardar en BBDD
-        Appointment.objects.create(
+        # Guardar en BBDD (Capturamos el objeto en una variable 'appointment')
+        appointment = Appointment.objects.create(
             professional=profile,
             service=service,
             client_name=client_name,
@@ -305,8 +305,11 @@ def booking_confirm_view(request, profile_slug, service_id):
             start_datetime=start_datetime
         )
         
-        # Redirigir a éxito (usaremos la misma plantilla genérica por ahora)
-        return render(request, 'success.html', {'service': service})
+        # Pasamos 'appointment' a la plantilla en lugar de solo 'service'
+        return render(request, 'success.html', {
+            'service': service, 
+            'appointment': appointment
+        })
 
     return render(request, 'booking_confirm.html', {
         'profile': profile,

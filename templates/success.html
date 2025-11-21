@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}¡Reserva Confirmada!{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[60vh]">
+    <div class="max-w-md w-full text-center p-8 bg-white rounded-xl shadow-lg border border-green-100">
+        
+        <!-- Icono de Celebración -->
+        <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-5xl mx-auto mb-6 animate-bounce">
+            🎉
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">¡Reserva Exitosa!</h1>
+        <p class="text-gray-600 mb-8">
+            Tu cita ha sido agendada correctamente. El profesional ya ha sido notificado.
+        </p>
+
+        <!-- TU CAJA DE DETALLES MEJORADA -->
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-8 text-left">
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Detalles</h3>
+            
+            <!-- Aquí mostramos la fecha y hora real de la cita -->
+            <p class="text-gray-800 mt-2 mb-2">
+                📅 {{ appointment.start_datetime|date:"l d M" }} <br>
+                ⏰ {{ appointment.start_datetime|time:"H:i" }}
+            </p>
+            
+            <!-- Y el servicio y profesional -->
+            <p class="font-bold text-gray-800 text-lg">{{ service.name }}</p>
+            <p class="text-sm text-gray-500">con {{ service.professional.display_name }}</p>
+        </div>
+
+        <div class="space-y-3">
+            <!-- Botón Principal -->
+            <a href="{% url 'index' %}" class="block w-full bg-primary text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-md">
+                Volver al Inicio
+            </a>
+            
+            <!-- Botón Secundario -->
+            <a href="{% url 'public_profile' service.professional.slug %}" class="block w-full text-primary font-medium px-6 py-2 hover:underline">
+                Agendar otra hora
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

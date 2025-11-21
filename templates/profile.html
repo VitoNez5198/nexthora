@@ -29,7 +29,7 @@
         {% if services %}
         {% for service in services %}
         <!-- En el futuro, este link llevará a la página de elegir hora -->
-        <a href="#"
+        <a href="{% url 'booking_step1' profile.slug service.id %}"
             class="block bg-white hover:bg-gray-50 border border-gray-200 hover:border-primary rounded-xl p-4 shadow-sm transition-all duration-200 transform hover:-translate-y-1 group">
             <div class="flex justify-between items-center">
                 <div>
