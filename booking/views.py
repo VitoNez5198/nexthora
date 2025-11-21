@@ -48,14 +48,11 @@ def login_view(request):
     # TODO: Reemplazar esto con el HTML de login.html
     return redirect('register') 
 
-# --- Vista de Dashboard (Placeholder) ---
-@login_required # ¡Importante! Esta página requiere que el usuario esté logueado
+# --- Vista de Dashboard ---
+@login_required
 def dashboard_view(request):
     """
-    Placeholder para el dashboard del profesional.
-    (La programaremos después, pero la necesitamos para la redirección)
+    Vista principal del Dashboard del profesional.
     """
-    # TODO: Reemplazar esto con el HTML de dashboard.html
-    # Por ahora, solo muestra un mensaje simple
-    from django.http import HttpResponse
-    return HttpResponse(f"¡Bienvenido a tu Dashboard, {request.user.username}!")
+    # Aquí renderizamos el archivo HTML real
+    return render(request, 'dashboard.html')

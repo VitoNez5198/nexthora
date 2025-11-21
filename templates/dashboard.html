@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+
+    <!-- ENCABEZADO DE BIENVENIDA -->
+    <div
+        class="flex flex-col md:flex-row justify-between items-center mb-8 bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div>
+            <h1 class="text-2xl font-bold text-dark-gray">Hola, {{ user.username }} 👋</h1>
+            <p class="text-gray-600">Aquí está el resumen de tu negocio hoy.</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="#" class="text-primary font-medium hover:underline flex items-center gap-2">
+                <!-- Icono de Ojo (Simulado con texto por ahora) -->
+                <span>👁️</span> Ver mi Perfil Público
+            </a>
+        </div>
+    </div>
+
+    <!-- TARJETAS DE ACCIÓN RÁPIDA -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+
+        <!-- Tarjeta 1: Servicios -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div class="text-3xl mb-2">✂️</div>
+            <h3 class="text-lg font-bold text-dark-gray">Mis Servicios</h3>
+            <p class="text-sm text-gray-500 mb-4">Define qué ofreces, cuánto dura y el precio.</p>
+            <a href="{% url 'services' %}"
+                class="block text-center w-full py-2 px-4 border border-primary text-primary rounded-md hover:bg-blue-50 font-medium">
+                Gestionar Servicios
+            </a>
+        </div>
+
+        <!-- Tarjeta 2: Horarios -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div class="text-3xl mb-2">📅</div>
+            <h3 class="text-lg font-bold text-dark-gray">Mi Horario</h3>
+            <p class="text-sm text-gray-500 mb-4">Configura tus días y horas de trabajo.</p>
+            <a href="{% url 'schedule' %}"
+                class="block text-center w-full py-2 px-4 border border-primary text-primary rounded-md hover:bg-blue-50 font-medium">
+                Configurar Horario
+            </a>
+        </div>
+
+        <!-- Tarjeta 3: Citas (Próximamente) -->
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div class="text-3xl mb-2">✅</div>
+            <h3 class="text-lg font-bold text-dark-gray">Citas Agendadas</h3>
+            <p class="text-sm text-gray-500 mb-4">Revisa quién te ha reservado una hora.</p>
+            <a href="{% url 'appointments' %}"
+                class="block text-center w-full py-2 px-4 bg-primary text-white rounded-md hover:bg-blue-700 font-medium">
+                Ver Agenda
+            </a>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DE PRÓXIMAS CITAS (Resumen) -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-lg font-bold text-dark-gray">Próximas Citas</h3>
+            <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                Hoy
+            </span>
+        </div>
+
+        <div class="p-6">
+            <!-- Estado Vacío (Empty State) -->
+            <div class="text-center py-8 text-gray-500">
+                <p class="mb-2">📭 No tienes citas para hoy.</p>
+                <p class="text-sm">Comparte tu link de perfil para empezar a recibir reservas.</p>
+            </div>
+
+            <!-- 
+               Aquí iteraremos sobre las citas reales con un bucle for
+               cuando tengamos datos en la base de datos.
+            -->
+        </div>
+    </div>
+
+</div>
+{% endblock %}

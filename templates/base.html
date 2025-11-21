@@ -47,9 +47,21 @@
     <!-- y pondrá su contenido aquí. -->
     <div class="container mx-auto mt-10 px-4">
         {% block content %}
-        <!-- El contenido de register.html, login.html, etc., irá aquí -->
-        {% endblock %}
-    </div>
+        <div class="container mx-auto mt-4 px-4">
+            {% if messages %}
+            {% for message in messages %}
+            <div
+                class="p-4 mb-4 text-sm rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <!-- El "Contenedor de Contenido" -->
+        <div class="container mx-auto mt-10 px-4">
+            {% block content %} {% endblock %}
+        </div>
 
 </body>
 
