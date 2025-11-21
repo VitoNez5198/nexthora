@@ -138,38 +138,51 @@ class Appointment(models.Model):
         ('COMPLETED', 'Completada'),
     ]
 
-    # A qué profesional pertenece
     professional = models.ForeignKey(ProfessionalProfile, on_delete=models.SET_NULL, null=True, related_name="appointments")
-    
-    # Qué servicio se agendó
     service = models.ForeignKey(Service, on_delete=models.SET_NULL, null=True, related_name="appointments")
     
-    # Datos del cliente final
-    client_name = models.CharField(max_length=200)
-    client_email = models.EmailField()
-    client_phone = models.CharField(max_length=20, blank=True, null=True) # Opcional
+    # --- NUEVOS DATOS DEL CLIENTE ---
+    client_name = models.CharField(max_length=100, verbose_name="Nombre")
+    client_last_name = models.CharField(max_length=100, verbose_name="Apellido", default="") # Nuevo
+    client_email = models.EmailField(verbose_name="Email")
+    client_whatsapp = models.CharField(max_length=20, verbose_name="WhatsApp") # Reemplaza o mejora a 'phone'
+    client_rut = models.CharField(max_length=12, verbose_name="RUT") # Nuevo
     
-    # La hora de inicio (¡La clave!)
+    # ... (start_datetime, end_datetime, status, timestamps siguen igual) ...
     start_datetime = models.DateTimeField(help_text="Fecha y hora de inicio de la cita")
-    
-    # La hora de fin (la calculamos automáticamente)
     end_datetime = models.DateTimeField(help_text="Fecha y hora de fin de la cita (calculada automáticamente)")
-
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='CONFIRMED')
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Cita para {self.client_name} - {self.service.name} el {self.start_datetime}"
+        return f"Cita: {self.client_name} {self.client_last_name} - {self.start_datetime}"
 
-    # Lógica automática: Cuando guardes la cita, calcula la hora de fin.
+    # ... (tu método save sigue igual) ...
     def save(self, *args, **kwargs):
+        # 1. Lógica de duración (la que ya tenías)
         if self.start_datetime and self.service:
-            # Calcula la hora de fin sumando los minutos del servicio
             self.end_datetime = self.start_datetime + datetime.timedelta(minutes=self.service.duration_minutes)
+        
+        # 2. Lógica de WhatsApp Chileno (+569)
+        # Limpiamos el número: quitamos espacios y símbolos
+        clean_number = ''.join(filter(str.isdigit, self.client_whatsapp))
+        
+        # Si el usuario escribió solo los 8 dígitos (ej: 87654321)
+        if len(clean_number) == 8:
+            self.client_whatsapp = f"+569{clean_number}"
+        
+        # Si escribió 9 dígitos (ej: 987654321), asumimos que puso el 9
+        elif len(clean_number) == 9:
+            self.client_whatsapp = f"+56{clean_number}"
+            
+        # Si ya puso el 569... (ej: 56987654321)
+        elif len(clean_number) == 11 and clean_number.startswith("56"):
+            self.client_whatsapp = f"+{clean_number}"
+
+        # (Si no cumple nada, guardamos lo que puso, pero idealmente validamos antes)
+
         super().save(*args, **kwargs)
-    
     class Meta:
         ordering = ['start_datetime']
 
