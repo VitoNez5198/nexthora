@@ -17,11 +17,11 @@
 
             <!-- ERRORES GENERALES -->
             {% if form.non_field_errors %}
-                <div class="p-3 text-sm text-red-800 bg-red-100 border border-red-300 rounded-md">
-                    {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
+            <div class="p-3 text-sm text-red-800 bg-red-100 border border-red-300 rounded-md">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
             {% endif %}
 
             <!-- Campo de Email -->
@@ -29,12 +29,11 @@
                 <label for="email" class="block text-sm font-medium text-gray-700">
                     Correo Electrónico
                 </label>
-                <input type="email" name="email" id="email" required 
-                       class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm 
+                <input type="email" name="email" id="email" required class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm 
                               {% if form.email.errors %} border-red-500 {% else %} border-gray-300 {% endif %}
                               focus:outline-none focus:ring-primary focus:border-primary">
                 {% for error in form.email.errors %}
-                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
                 {% endfor %}
             </div>
 
@@ -43,12 +42,11 @@
                 <label for="username" class="block text-sm font-medium text-gray-700">
                     Nombre de Usuario
                 </label>
-                <input type="text" name="username" id="username" required 
-                       class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm
+                <input type="text" name="username" id="username" required class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm
                               {% if form.username.errors %} border-red-500 {% else %} border-gray-300 {% endif %}
                               focus:outline-none focus:ring-primary focus:border-primary">
                 {% for error in form.username.errors %}
-                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
                 {% endfor %}
                 <p class="mt-1 text-xs text-gray-500">
                     Solo letras (a-z), números (0-9) y guion bajo (_).
@@ -60,12 +58,14 @@
                 <label for="password" class="block text-sm font-medium text-gray-700">
                     Contraseña
                 </label>
-                <input type="password" name="password" id="password" required 
-                       class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm
-                              {% if form.password.errors %} border-red-500 {% else %} border-gray-300 {% endif %}
+                <!-- Cambiamos name="password" a name="password1" -->
+                <input type="password" name="password1" id="password" required class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm
+                              {% if form.password1.errors %} border-red-500 {% else %} border-gray-300 {% endif %}
                               focus:outline-none focus:ring-primary focus:border-primary">
-                {% for error in form.password.errors %}
-                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+
+                <!-- Mostramos los errores de 'password1' -->
+                {% for error in form.password1.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
                 {% endfor %}
             </div>
 
@@ -74,12 +74,11 @@
                 <label for="password2" class="block text-sm font-medium text-gray-700">
                     Confirmar Contraseña
                 </label>
-                <input type="password" name="password2" id="password2" required 
-                       class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm
+                <input type="password" name="password2" id="password2" required class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm
                               {% if form.password2.errors %} border-red-500 {% else %} border-gray-300 {% endif %}
                               focus:outline-none focus:ring-primary focus:border-primary">
                 {% for error in form.password2.errors %}
-                    <p class="mt-1 text-xs text-red-600">{{ error }}</p>
+                <p class="mt-1 text-xs text-red-600">{{ error }}</p>
                 {% endfor %}
             </div>
 
