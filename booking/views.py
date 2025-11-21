@@ -154,7 +154,6 @@ def appointments_view(request):
         return redirect('dashboard')
 
     # Obtener citas futuras ordenadas por fecha
-    # (Usamos timezone.now() para no mostrar citas antiguas, opcional)
     upcoming_appointments = Appointment.objects.filter(
         professional=profile,
         start_datetime__gte=timezone.now()
