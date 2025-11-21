@@ -5,8 +5,19 @@
 {% block content %}
 <div class="max-w-md mx-auto py-10">
 
+    <!-- Mensajes de Error Globales (del Backend) -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div class="p-4 rounded-lg bg-red-100 text-red-700 text-sm border border-red-200">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <h1 class="text-2xl font-bold text-center mb-2 text-dark-gray">Completa tus datos</h1>
-    <p class="text-center text-gray-500 mb-8">Estás agendando con {{ profile.display_name }}</p>
+    <p class="text-center text-gray-500 mb-8">Para confirmar tu cita con {{ profile.display_name }}</p>
 
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
 
@@ -21,6 +32,7 @@
         </div>
 
         <!-- Formulario -->
+        <!-- IMPORTANTE: action="" envía al mismo URL, manteniendo los parámetros GET (?date=...&time=...) -->
         <form method="POST" class="space-y-4">
             {% csrf_token %}
 
@@ -59,9 +71,9 @@
                     <span class="absolute left-3 top-2 text-gray-500 font-medium border-r border-gray-300 pr-2">
                         +569
                     </span>
-                    <!-- Input con padding izquierdo para dejar espacio al prefijo -->
+                    <!-- Pattern para validar solo 8 dígitos -->
                     <input type="tel" name="client_whatsapp" placeholder="1234 5678" required maxlength="8"
-                        pattern="[0-9]{8}"
+                        pattern="[0-9]{8}" title="Ingresa solo los 8 dígitos de tu número"
                         class="w-full pl-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary font-medium tracking-wide">
                 </div>
                 <p class="text-xs text-gray-400 mt-1">Ingresa los 8 números restantes.</p>

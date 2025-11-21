@@ -250,42 +250,68 @@ def booking_view(request, profile_slug, service_id):
     })
 
 # --- VISTA PÚBLICA: CONFIRMAR ---
+# --- VISTA PASO 2: CONFIRMAR Y GUARDAR ---
 def booking_confirm_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
     service = get_object_or_404(Service, id=service_id, professional=profile)
     
+    # IMPORTANTE: Obtener fecha y hora de la URL
     date_str = request.GET.get('date')
     time_str = request.GET.get('time')
     
     if request.method == 'POST':
-        # 1. Obtener TODOS los datos nuevos
+        print("--- INICIANDO PROCESO DE RESERVA ---") # Debug
+        
+        # 1. Obtener datos del formulario
         client_name = request.POST.get('client_name')
         client_last_name = request.POST.get('client_last_name')
         client_rut = request.POST.get('client_rut')
         client_email = request.POST.get('client_email')
         client_whatsapp = request.POST.get('client_whatsapp')
         
-        start_datetime_str = f"{date_str} {time_str}"
-        start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M')
-        
-        # 2. Crear la cita (Sin client_phone, usando los nuevos campos)
-        appointment = Appointment.objects.create(
-            professional=profile,
-            service=service,
-            client_name=client_name,
-            client_last_name=client_last_name,
-            client_rut=client_rut,
-            client_email=client_email,
-            client_whatsapp=client_whatsapp,
-            start_datetime=start_datetime
-        )
-        
-        # Redirigir al éxito
-        return render(request, 'success.html', {
-            'service': service, 
-            'appointment': appointment
-        })
+        print(f"Datos recibidos: {client_name}, {client_last_name}, {client_rut}, {client_email}, {client_whatsapp}") # Debug
 
+        # Validar campos vacíos
+        if not all([client_name, client_last_name, client_rut, client_email, client_whatsapp]):
+            print("ERROR: Faltan campos") # Debug
+            messages.error(request, "Por favor completa todos los campos.")
+            return render(request, 'booking_confirm.html', {
+                'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str
+            })
+
+        try:
+            # Reconstruir fecha
+            start_datetime_str = f"{date_str} {time_str}"
+            start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M')
+            
+            print(f"Intentando crear cita para: {start_datetime}") # Debug
+
+            # 2. Crear la cita
+            appointment = Appointment.objects.create(
+                professional=profile,
+                service=service,
+                client_name=client_name,
+                client_last_name=client_last_name,
+                client_rut=client_rut,
+                client_email=client_email,
+                client_whatsapp=client_whatsapp,
+                start_datetime=start_datetime
+            )
+            
+            print("¡CITA CREADA CON ÉXITO!") # Debug
+            
+            # Redirigir al éxito
+            return render(request, 'success.html', {
+                'service': service, 
+                'appointment': appointment,
+                'profile': profile
+            })
+            
+        except Exception as e:
+            print(f"ERROR CRÍTICO AL GUARDAR: {e}") # Debug
+            messages.error(request, f"Error al agendar: {e}")
+
+    # GET Request
     return render(request, 'booking_confirm.html', {
         'profile': profile,
         'service': service,
