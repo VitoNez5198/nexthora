@@ -1,83 +1,84 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
-from .forms import NexthoraUserCreationForm # Importa el formulario que acabamos de crear
+from django.contrib import messages  # ¡Faltaba esto!
+from django.http import HttpResponse
+
+# Importamos los formularios y modelos
 from .forms import NexthoraUserCreationForm, ServiceForm
 from .models import Service, ProfessionalProfile
-from django.shortcuts import get_object_or_404
 
-# --- ¡NUEVA VISTA DE INICIO! ---
+from .forms import BusinessHoursForm # ¡Importa el nuevo form!
+from .models import BusinessHours # ¡Importa el modelo!
+
+# --- VISTA DE INICIO ---
 def index_view(request):
     """
     Vista para la página de inicio (la raíz '/').
-    Por ahora, simplemente redirige a la página de registro.
+    Por ahora, simplemente redirige a la página de registro o dashboard.
     """
-    return redirect('register') # Redirige a la URL con name='register'
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return redirect('register')
 
-# --- Vista de Registro ---
+# --- VISTA DE REGISTRO ---
 def register_view(request):
     """
     Maneja la lógica para registrar un nuevo profesional.
     """
     if request.method == 'POST':
-        # Si el formulario se envía (POST), procesa los datos
         form = NexthoraUserCreationForm(request.POST)
-        
         if form.is_valid():
-            # Si los datos son válidos (contraseñas coinciden, etc.):
-            user = form.save() # 1. Guarda el nuevo usuario en la BBDD
-            login(request, user) # 2. Inicia sesión automáticamente
-            # 3. Redirige al profesional a su nuevo Dashboard
-            return redirect('dashboard') 
+            user = form.save()
+            login(request, user)
+            messages.success(request, f"¡Bienvenido, {user.username}! Tu cuenta ha sido creada.")
+            return redirect('dashboard')
         else:
-            # Si el formulario no es válido (ej. usuario ya existe),
-            # vuelve a mostrar la página con los errores.
-            return render(request, 'register.html', {'form': form})
-    
+            messages.error(request, "Hubo un error en el registro. Revisa los campos.")
     else:
-        # Si es la primera vez que se carga la página (GET):
-        # 1. Crea un formulario vacío
         form = NexthoraUserCreationForm()
-        # 2. Muestra la plantilla 'register.html'
-        return render(request, 'register.html', {'form': form})
+    
+    return render(request, 'register.html', {'form': form})
 
-# --- Vista de Login (Placeholder) ---
+# --- VISTA DE LOGIN (Placeholder) ---
 def login_view(request):
     """
-    Placeholder para la vista de login.
-    (La programaremos después, pero la necesitamos para {% url 'login' %} )
+    Placeholder para login. Redirige a registro por ahora.
     """
-    # Por ahora, solo redirige al registro si intentan ir a /login/
-    # TODO: Reemplazar esto con el HTML de login.html
     return redirect('register') 
 
-# --- Vista de Dashboard ---
+# --- VISTA DE DASHBOARD ---
 @login_required
 def dashboard_view(request):
     """
-    Vista principal del Dashboard del profesional.
+    Vista principal del Dashboard.
     """
-    # Aquí renderizamos el archivo HTML real
     return render(request, 'dashboard.html')
+
 # --- VISTA: GESTIONAR SERVICIOS ---
 @login_required
 def services_view(request):
-    # Obtener el perfil del usuario actual
-    profile = request.user.profile
-    
-    # Procesar el formulario si es POST (Crear nuevo servicio)
+    # Intentamos obtener el perfil. Si falla, redirigimos (seguridad).
+    try:
+        profile = request.user.profile
+    except ProfessionalProfile.DoesNotExist:
+        messages.error(request, "Error: Tu usuario no tiene un perfil profesional asociado.")
+        return redirect('dashboard')
+
     if request.method == 'POST':
         form = ServiceForm(request.POST)
         if form.is_valid():
             service = form.save(commit=False)
-            service.professional = profile # Asignar al profesional actual
+            service.professional = profile # Asignamos el servicio al profesional actual
             service.save()
             messages.success(request, "¡Servicio creado con éxito!")
             return redirect('services')
+        else:
+            messages.error(request, "Error al crear el servicio. Revisa el formulario.")
     else:
         form = ServiceForm()
 
-    # Obtener lista de servicios del profesional
+    # Listar solo los servicios de ESTE profesional
     services = Service.objects.filter(professional=profile)
 
     return render(request, 'services.html', {
@@ -88,7 +89,7 @@ def services_view(request):
 # --- VISTA: ELIMINAR SERVICIO ---
 @login_required
 def delete_service_view(request, service_id):
-    # Obtener el servicio (asegurando que pertenezca al usuario actual)
+    # Obtenemos el servicio solo si pertenece al usuario actual (seguridad)
     service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
     
     if request.method == 'POST':
@@ -96,3 +97,47 @@ def delete_service_view(request, service_id):
         messages.success(request, "Servicio eliminado correctamente.")
         
     return redirect('services')
+
+# --- VISTA: GESTIONAR HORARIOS ---
+@login_required
+def schedule_view(request):
+    try:
+        profile = request.user.profile
+    except:
+        return redirect('dashboard')
+
+    if request.method == 'POST':
+        form = BusinessHoursForm(request.POST)
+        if form.is_valid():
+            hours = form.save(commit=False)
+            hours.professional = profile
+            try:
+                hours.save()
+                messages.success(request, "¡Horario añadido correctamente!")
+                return redirect('schedule')
+            except Exception as e:
+                # Captura error de duplicados (unique_together en models.py)
+                messages.error(request, "Error: Ya existe un horario idéntico para este día.")
+        else:
+            messages.error(request, "Error en el horario. Revisa que la hora fin sea mayor a la inicio.")
+    else:
+        form = BusinessHoursForm()
+
+    # Obtener horarios ordenados por día y hora
+    schedule = BusinessHours.objects.filter(professional=profile).order_by('weekday', 'start_time')
+
+    return render(request, 'schedule.html', {
+        'form': form,
+        'schedule': schedule
+    })
+
+# --- VISTA: ELIMINAR HORARIO ---
+@login_required
+def delete_schedule_view(request, schedule_id):
+    hours = get_object_or_404(BusinessHours, id=schedule_id, professional=request.user.profile)
+    
+    if request.method == 'POST':
+        hours.delete()
+        messages.success(request, "Bloque de horario eliminado.")
+        
+    return redirect('schedule')

@@ -19,4 +19,14 @@ urlpatterns = [
     
     # Ruta para eliminar un servicio específico
     path('dashboard/services/delete/<int:service_id>/', views.delete_service_view, name='delete_service'),
+    
+    # --- GESTIÓN DE HORARIOS ---
+    # Esta es la ruta real para "Mi Horario"
+    path('dashboard/schedule/', views.schedule_view, name='schedule'),
+    
+    # Ruta para eliminar un horario
+    path('dashboard/schedule/delete/<int:schedule_id>/', views.delete_schedule_view, name='delete_schedule'),
+
+    # ... (appointments sigue siendo placeholder) ...
+    path('dashboard/appointments/', views.dashboard_view, name='appointments'),
 ]

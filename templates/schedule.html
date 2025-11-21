@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Horario - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+
+    <!-- ENCABEZADO -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-dark-gray">📅 Mi Horario</h1>
+        <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-primary text-sm">← Volver al Dashboard</a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- COLUMNA IZQ: FORMULARIO -->
+        <div class="lg:col-span-1">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-6">
+                <h2 class="text-lg font-bold text-dark-gray mb-4">Añadir Bloque</h2>
+                <form method="POST" action="{% url 'schedule' %}">
+                    {% csrf_token %}
+
+                    <div class="space-y-4">
+                        <!-- Día -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Día</label>
+                            {{ form.weekday }}
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Inicio -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Desde</label>
+                                {{ form.start_time }}
+                            </div>
+                            <!-- Fin -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Hasta</label>
+                                {{ form.end_time }}
+                            </div>
+                        </div>
+
+                        {% if form.errors %}
+                        <div class="text-xs text-red-600 bg-red-50 p-2 rounded">
+                            {{ form.non_field_errors }}
+                            {% for field in form %}
+                            {% for error in field.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit"
+                        class="w-full mt-6 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium transition">
+                        + Guardar Horario
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- COLUMNA DER: LISTA VISUAL -->
+        <div class="lg:col-span-2">
+            <h2 class="text-lg font-bold text-dark-gray mb-4">Tu Disponibilidad Semanal</h2>
+
+            {% if schedule %}
+            <div class="space-y-3">
+                <!-- Iteramos sobre los horarios -->
+                {% for hours in schedule %}
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <!-- Badge del Día -->
+                        <span class="inline-flex items-center justify-center px-3 py-1 rounded-full text-sm font-bold
+                                {% if hours.weekday == 0 %} bg-blue-100 text-blue-800
+                                {% elif hours.weekday == 1 %} bg-blue-100 text-blue-800
+                                {% elif hours.weekday == 2 %} bg-blue-100 text-blue-800
+                                {% elif hours.weekday == 3 %} bg-blue-100 text-blue-800
+                                {% elif hours.weekday == 4 %} bg-blue-100 text-blue-800
+                                {% elif hours.weekday == 5 %} bg-green-100 text-green-800
+                                {% else %} bg-red-100 text-red-800 {% endif %}">
+                            {{ hours.get_weekday_display }}
+                        </span>
+
+                        <!-- Horas -->
+                        <span class="text-gray-700 font-medium">
+                            {{ hours.start_time|time:"H:i" }} - {{ hours.end_time|time:"H:i" }}
+                        </span>
+                    </div>
+
+                    <!-- Botón Borrar -->
+                    <form method="POST" action="{% url 'delete_schedule' hours.id %}"
+                        onsubmit="return confirm('¿Eliminar este horario?');">
+                        {% csrf_token %}
+                        <button type="submit" class="text-gray-400 hover:text-red-500 transition" title="Eliminar">
+                            ✕
+                        </button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Estado Vacío -->
+            <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-10 text-center">
+                <div class="text-4xl mb-3">📅</div>
+                <h3 class="text-gray-900 font-medium">Sin horarios definidos</h3>
+                <p class="text-gray-500 text-sm mt-1">Añade bloques de tiempo para que los clientes puedan agendar.</p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
