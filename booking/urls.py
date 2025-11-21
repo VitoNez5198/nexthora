@@ -31,6 +31,13 @@ urlpatterns = [
     # CAMBIO: Ahora apunta a 'views.appointments_view' en vez de 'dashboard_view'
     path('dashboard/appointments/', views.appointments_view, name='appointments'),
     
+    # --- FLUJO DE RESERVA (CLIENTE) ---
+    # Paso 1: Elegir Fecha y Hora
+    path('<slug:profile_slug>/book/<int:service_id>/', views.booking_view, name='booking_step1'),
+    
+    # Paso 2: Confirmar y Pagar (o solo Datos)
+    path('<slug:profile_slug>/book/<int:service_id>/confirm/', views.booking_confirm_view, name='booking_step2'),
+    
     # --- RUTA PÚBLICA (¡SIEMPRE AL FINAL!) ---
     # Captura cualquier texto (slug) y busca un perfil.
     # Ej: nexthora.com/peluqueria-cool -> profile_slug="peluqueria-cool"

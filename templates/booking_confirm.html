@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Confirmar Reserva{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-10">
+
+    <h1 class="text-2xl font-bold text-center mb-2">Completa tus datos</h1>
+    <p class="text-center text-gray-500 mb-8">Para confirmar tu cita</p>
+
+    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+        <!-- Resumen -->
+        <div class="mb-6 pb-6 border-b border-gray-100">
+            <p class="text-sm text-gray-500">Servicio</p>
+            <p class="font-bold text-gray-900">{{ service.name }}</p>
+
+            <div class="flex gap-8 mt-4">
+                <div>
+                    <p class="text-sm text-gray-500">Fecha</p>
+                    <p class="font-medium">{{ date_str }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500">Hora</p>
+                    <p class="font-medium">{{ time_str }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario Cliente -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tu Nombre</label>
+                    <input type="text" name="client_name" required
+                        class="w-full px-3 py-2 border rounded-md focus:ring-primary">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tu Email</label>
+                    <input type="email" name="client_email" required
+                        class="w-full px-3 py-2 border rounded-md focus:ring-primary">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Teléfono (Opcional)</label>
+                    <input type="tel" name="client_phone" class="w-full px-3 py-2 border rounded-md focus:ring-primary">
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full mt-8 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-md">
+                Confirmar Reserva
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+```
+
+---
+
+### 4. Actualizar el Enlace en `profile.html`
+
+Finalmente, vuelve a tu `nexthora/templates/profile.html` y actualiza el enlace de los servicios (que tenía `href="#"`)
+para que apunte a la nueva vista de agendamiento.
+
+Busca el `<a href="#" ...>` dentro del bucle `for service` y cámbialo por:
+
+    ```html
+    <a href="{% url 'booking_step1' profile.slug service.id %}" class="block bg-white ... (resto de tus clases) ...">

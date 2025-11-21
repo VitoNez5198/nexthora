@@ -7,7 +7,7 @@
 
     <!-- TARJETA DEL PERFIL -->
     <div class="text-center mb-8">
-        <!-- Foto de Perfil (Simulada con inicial) -->
+        <!-- Avatar Simulado (Inicial) -->
         <div
             class="w-24 h-24 bg-gradient-to-br from-primary to-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4">
             {{ profile.display_name|slice:":1" }}
@@ -16,37 +16,45 @@
         <h1 class="text-2xl font-bold text-gray-900">{{ profile.display_name }}</h1>
 
         {% if profile.bio %}
-        <p class="text-gray-600 mt-2">{{ profile.bio }}</p>
+        <p class="text-gray-600 mt-2 px-4">{{ profile.bio }}</p>
         {% endif %}
     </div>
 
-    <!-- LISTA DE SERVICIOS (Estilo Linktree) -->
-    <div class="space-y-4">
-        <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">
+    <!-- LISTA DE SERVICIOS -->
+    <div class="space-y-4 px-4">
+        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 text-center">
             Selecciona un servicio
         </h2>
 
         {% if services %}
         {% for service in services %}
+        <!-- En el futuro, este link llevará a la página de elegir hora -->
         <a href="#"
-            class="block bg-white hover:bg-gray-50 border border-gray-200 hover:border-primary rounded-xl p-4 shadow-sm transition-all duration-200 transform hover:-translate-y-1">
+            class="block bg-white hover:bg-gray-50 border border-gray-200 hover:border-primary rounded-xl p-4 shadow-sm transition-all duration-200 transform hover:-translate-y-1 group">
             <div class="flex justify-between items-center">
                 <div>
-                    <h3 class="font-bold text-gray-800">{{ service.name }}</h3>
-                    <p class="text-sm text-gray-500">{{ service.duration_minutes }} min</p>
+                    <h3 class="font-bold text-gray-800 group-hover:text-primary transition-colors">
+                        {{ service.name }}
+                    </h3>
+                    <p class="text-sm text-gray-500">⏱️ {{ service.duration_minutes }} min</p>
                 </div>
-                <div class="text-primary font-bold">
-                    ${{ service.price|default:"Consultar" }}
+                <div class="text-right">
+                    <span class="block font-bold text-gray-900">
+                        ${{ service.price|default:"Consultar" }}
+                    </span>
+                    <span class="text-xs text-primary font-medium">Reservar &rarr;</span>
                 </div>
             </div>
             {% if service.description %}
-            <p class="text-xs text-gray-400 mt-2 line-clamp-2">{{ service.description }}</p>
+            <p class="text-xs text-gray-400 mt-2 line-clamp-2 border-t border-gray-100 pt-2">
+                {{ service.description }}
+            </p>
             {% endif %}
         </a>
         {% endfor %}
         {% else %}
-        <div class="text-center p-6 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p class="text-gray-500">Este profesional aún no tiene servicios configurados.</p>
+        <div class="text-center p-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <p class="text-gray-500">Este profesional aún no tiene servicios disponibles.</p>
         </div>
         {% endif %}
     </div>
@@ -54,7 +62,7 @@
     <!-- FOOTER -->
     <div class="mt-12 text-center">
         <p class="text-xs text-gray-400">
-            Agendamiento por <span class="font-bold text-primary">Nexthora</span>
+            Gestionado por <span class="font-bold text-primary">Nexthora</span>
         </p>
     </div>
 
