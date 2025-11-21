@@ -15,7 +15,6 @@
     <title>{% block title %}Nexthora{% endblock %}</title>
 
     <script>
-        // Configuración de Tailwind (opcional, para extender colores)
         tailwind.config = {
             theme: {
                 extend: {
@@ -36,32 +35,24 @@
 
 <body class="bg-light-gray font-sans antialiased">
 
-    <!-- 
-      Aquí podríamos poner una barra de navegación (Navbar) 
-      que aparecería en todas las páginas del "Mundo 2" (Dashboard).
-      Por ahora, la dejamos limpia para el Login/Registro.
-    -->
+    <!-- Bloque para mensajes flash (éxito/error) -->
+    <div class="container mx-auto mt-4 px-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            class="p-4 mb-4 text-sm rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
 
-    <!-- El "Contenedor de Contenido" -->
-    <!-- Django buscará el bloque 'content' en los archivos hijos -->
-    <!-- y pondrá su contenido aquí. -->
+    <!-- El Contenedor Principal -->
     <div class="container mx-auto mt-10 px-4">
+        <!-- Aquí es donde se inyectará el contenido de register.html, dashboard.html, etc. -->
         {% block content %}
-        <div class="container mx-auto mt-4 px-4">
-            {% if messages %}
-            {% for message in messages %}
-            <div
-                class="p-4 mb-4 text-sm rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% endif %}">
-                {{ message }}
-            </div>
-            {% endfor %}
-            {% endif %}
-        </div>
-
-        <!-- El "Contenedor de Contenido" -->
-        <div class="container mx-auto mt-10 px-4">
-            {% block content %} {% endblock %}
-        </div>
+        {% endblock %}
+    </div>
 
 </body>
 
