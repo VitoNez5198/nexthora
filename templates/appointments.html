@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Mi Agenda - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+
+    <!-- ENCABEZADO -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-dark-gray">✅ Mi Agenda</h1>
+        <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-primary text-sm">← Volver al Dashboard</a>
+    </div>
+
+    <!-- SECCIÓN: PRÓXIMAS CITAS -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+            <h2 class="font-bold text-gray-700">Próximas Citas</h2>
+            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                {{ upcoming_appointments.count }} agendadas
+            </span>
+        </div>
+
+        <div class="divide-y divide-gray-200">
+            {% if upcoming_appointments %}
+            {% for cita in upcoming_appointments %}
+            <div
+                class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center hover:bg-gray-50 transition">
+
+                <!-- Info Fecha y Hora -->
+                <div class="flex items-center gap-4 mb-4 md:mb-0">
+                    <div
+                        class="text-center bg-blue-50 text-blue-700 p-3 rounded-lg border border-blue-100 min-w-[80px]">
+                        <div class="text-xs font-bold uppercase">{{ cita.start_datetime|date:"M" }}</div>
+                        <div class="text-2xl font-bold">{{ cita.start_datetime|date:"d" }}</div>
+                        <div class="text-xs">{{ cita.start_datetime|date:"D" }}</div>
+                    </div>
+                    <div>
+                        <div class="text-xl font-bold text-gray-800">
+                            {{ cita.start_datetime|time:"H:i" }}
+                        </div>
+                        <div class="text-sm text-gray-500">
+                            {{ cita.service.name }} ({{ cita.service.duration_minutes }} min)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Info Cliente -->
+                <div class="text-right">
+                    <div class="font-medium text-gray-900">{{ cita.client_name }}</div>
+                    <div class="text-sm text-gray-500">{{ cita.client_email }}</div>
+                    <div class="text-sm text-gray-500">{{ cita.client_phone|default:"Sin teléfono" }}</div>
+
+                    <span class="inline-block mt-2 text-xs px-2 py-1 rounded border
+                            {% if cita.status == 'CONFIRMED' %} bg-green-50 text-green-700 border-green-200
+                            {% else %} bg-gray-50 text-gray-600 border-gray-200 {% endif %}">
+                        {{ cita.get_status_display }}
+                    </span>
+                </div>
+
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="p-12 text-center text-gray-500">
+                <div class="text-4xl mb-3">📭</div>
+                <p>No tienes citas próximas.</p>
+                <p class="text-sm">¡Comparte tu perfil para recibir reservas!</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- SECCIÓN: HISTORIAL (Colapsable o simple) -->
+    {% if past_appointments %}
+    <div class="mt-8">
+        <h3 class="text-lg font-bold text-gray-500 mb-4">Historial Pasado</h3>
+        <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden opacity-75">
+            <div class="divide-y divide-gray-200">
+                {% for cita in past_appointments %}
+                <div class="p-4 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <span class="text-gray-400 font-medium">{{ cita.start_datetime|date:"d/m/Y" }}</span>
+                        <span class="text-gray-600">{{ cita.client_name }}</span>
+                    </div>
+                    <span class="text-sm text-gray-400">{{ cita.service.name }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

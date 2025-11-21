@@ -11,6 +11,9 @@ from .models import Service, ProfessionalProfile
 from .forms import BusinessHoursForm # ¡Importa el nuevo form!
 from .models import BusinessHours # ¡Importa el modelo!
 
+
+from .models import Appointment
+from django.utils import timezone
 # --- VISTA DE INICIO ---
 def index_view(request):
     """
@@ -141,3 +144,29 @@ def delete_schedule_view(request, schedule_id):
         messages.success(request, "Bloque de horario eliminado.")
         
     return redirect('schedule')
+
+# --- VISTA: VER AGENDA ---
+@login_required
+def appointments_view(request):
+    try:
+        profile = request.user.profile
+    except:
+        return redirect('dashboard')
+
+    # Obtener citas futuras ordenadas por fecha
+    # (Usamos timezone.now() para no mostrar citas antiguas, opcional)
+    upcoming_appointments = Appointment.objects.filter(
+        professional=profile,
+        start_datetime__gte=timezone.now()
+    ).order_by('start_datetime')
+
+    # Obtener citas pasadas (opcional, para historial)
+    past_appointments = Appointment.objects.filter(
+        professional=profile,
+        start_datetime__lt=timezone.now()
+    ).order_by('-start_datetime')
+
+    return render(request, 'appointments.html', {
+        'upcoming_appointments': upcoming_appointments,
+        'past_appointments': past_appointments
+    })

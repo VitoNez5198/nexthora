@@ -29,4 +29,8 @@ urlpatterns = [
 
     # ... (appointments sigue siendo placeholder) ...
     path('dashboard/appointments/', views.dashboard_view, name='appointments'),
+    
+    # --- GESTIÓN DE CITAS (AGENDA) ---
+    # CAMBIO: Ahora apunta a 'views.appointments_view' en vez de 'dashboard_view'
+    path('dashboard/appointments/', views.appointments_view, name='appointments'),
 ]
