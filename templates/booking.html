@@ -1,48 +1,74 @@
 {% extends "base.html" %}
 
-{% block title %}Elegir Hora - {{ service.name }}{% endblock %}
+{% block title %}Confirmar Reserva{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto py-10">
 
-    <a href="{% url 'public_profile' profile.slug %}" class="text-sm text-gray-500 mb-4 block">← Volver al perfil</a>
+    <h1 class="text-2xl font-bold text-center mb-2 text-dark-gray">Completa tus datos</h1>
+    <p class="text-center text-gray-500 mb-8">Para confirmar tu cita con {{ profile.display_name }}</p>
 
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
-        <h1 class="text-xl font-bold text-gray-900">{{ service.name }}</h1>
-        <p class="text-gray-500">con {{ profile.display_name }}</p>
-        <div class="mt-2 flex gap-4 text-sm">
-            <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded">⏱️ {{ service.duration_minutes }} min</span>
-            <span class="bg-green-50 text-green-700 px-2 py-1 rounded">💲 ${{ service.price }}</span>
+    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+        <!-- Resumen de la Cita -->
+        <div class="mb-6 pb-6 border-b border-gray-100">
+            <p class="font-bold text-gray-900 text-lg">{{ service.name }}</p>
+            <div class="flex gap-4 mt-2 text-sm text-gray-600">
+                <span class="flex items-center gap-1">📅 {{ date_str }}</span>
+                <span class="flex items-center gap-1">⏰ {{ time_str }}</span>
+            </div>
         </div>
+
+        <!-- Formulario de Datos del Cliente -->
+        <form method="POST" class="space-y-4">
+            {% csrf_token %}
+
+            <!-- Nombre y Apellido -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre</label>
+                    <input type="text" name="client_name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Apellido</label>
+                    <input type="text" name="client_last_name" required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors">
+                </div>
+            </div>
+
+            <!-- RUT -->
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">RUT</label>
+                <input type="text" name="client_rut" placeholder="12.345.678-9" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors">
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                <input type="email" name="client_email" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary transition-colors">
+            </div>
+
+            <!-- WhatsApp (Con formato chileno) -->
+            <div>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">WhatsApp</label>
+                <div class="relative">
+                    <span class="absolute left-3 top-2 text-gray-500 font-medium border-r border-gray-300 pr-2">
+                        +569
+                    </span>
+                    <input type="tel" name="client_whatsapp" placeholder="1234 5678" required maxlength="8"
+                        pattern="[0-9]{8}"
+                        class="w-full pl-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary font-medium tracking-wide transition-colors">
+                </div>
+                <p class="text-xs text-gray-400 mt-1">Ingresa los 8 números restantes.</p>
+            </div>
+
+            <button type="submit"
+                class="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-md transform hover:-translate-y-0.5">
+                Confirmar Reserva
+            </button>
+        </form>
     </div>
-
-    <!-- SELECTOR DE FECHA -->
-    <form method="GET" class="mb-8">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona una fecha:</label>
-        <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" onchange="this.form.submit()"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
-    </form>
-
-    <!-- LISTA DE HORAS -->
-    <div>
-        <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Horas disponibles</h2>
-
-        {% if available_slots %}
-        <div class="grid grid-cols-3 gap-3">
-            {% for slot in available_slots %}
-            <a href="{% url 'booking_step2' profile.slug service.id %}?date={{ selected_date|date:'Y-m-d' }}&time={{ slot|time:'H:i' }}"
-                class="block text-center py-3 bg-white border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
-                {{ slot|time:"H:i" }}
-            </a>
-            {% endfor %}
-        </div>
-        {% else %}
-        <div class="text-center p-8 bg-gray-50 rounded-lg">
-            <p class="text-gray-500">No hay horas disponibles para este día.</p>
-            <p class="text-sm text-gray-400">Prueba seleccionando otra fecha.</p>
-        </div>
-        {% endif %}
-    </div>
-
 </div>
 {% endblock %}

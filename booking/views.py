@@ -258,9 +258,12 @@ def booking_confirm_view(request, profile_slug, service_id):
     time_str = request.GET.get('time')
     
     if request.method == 'POST':
+        # Obtener datos del formulario
         client_name = request.POST.get('client_name')
+        client_last_name = request.POST.get('client_last_name') # ¡Nuevo!
         client_email = request.POST.get('client_email')
-        client_phone = request.POST.get('client_phone')
+        client_whatsapp = request.POST.get('client_whatsapp')   # ¡Nuevo!
+        client_rut = request.POST.get('client_rut')             # ¡Nuevo!
         
         start_datetime_str = f"{date_str} {time_str}"
         start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M')
@@ -269,8 +272,11 @@ def booking_confirm_view(request, profile_slug, service_id):
             professional=profile,
             service=service,
             client_name=client_name,
+            client_last_name=client_last_name, # ¡Nuevo!
             client_email=client_email,
-            client_phone=client_phone,
+            client_whatsapp=client_whatsapp,   # ¡Nuevo!
+            client_rut=client_rut,             # ¡Nuevo!
+            # Elimina 'client_phone' si ya no lo usas en el modelo
             start_datetime=start_datetime
         )
         
