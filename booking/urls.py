@@ -12,4 +12,11 @@ urlpatterns = [
     path('services/', views.dashboard_view, name='services'), 
     path('schedule/', views.dashboard_view, name='schedule'),
     path('appointments/', views.dashboard_view, name='appointments'),
+    
+    # --- GESTIÓN DE SERVICIOS ---
+    # Esta es la ruta real para "Mis Servicios"
+    path('dashboard/services/', views.services_view, name='services'), 
+    
+    # Ruta para eliminar un servicio específico
+    path('dashboard/services/delete/<int:service_id>/', views.delete_service_view, name='delete_service'),
 ]

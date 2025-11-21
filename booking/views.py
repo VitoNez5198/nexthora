@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import NexthoraUserCreationForm # Importa el formulario que acabamos de crear
+from .forms import NexthoraUserCreationForm, ServiceForm
+from .models import Service, ProfessionalProfile
+from django.shortcuts import get_object_or_404
 
 # --- ¡NUEVA VISTA DE INICIO! ---
 def index_view(request):
@@ -56,3 +59,40 @@ def dashboard_view(request):
     """
     # Aquí renderizamos el archivo HTML real
     return render(request, 'dashboard.html')
+# --- VISTA: GESTIONAR SERVICIOS ---
+@login_required
+def services_view(request):
+    # Obtener el perfil del usuario actual
+    profile = request.user.profile
+    
+    # Procesar el formulario si es POST (Crear nuevo servicio)
+    if request.method == 'POST':
+        form = ServiceForm(request.POST)
+        if form.is_valid():
+            service = form.save(commit=False)
+            service.professional = profile # Asignar al profesional actual
+            service.save()
+            messages.success(request, "¡Servicio creado con éxito!")
+            return redirect('services')
+    else:
+        form = ServiceForm()
+
+    # Obtener lista de servicios del profesional
+    services = Service.objects.filter(professional=profile)
+
+    return render(request, 'services.html', {
+        'form': form,
+        'services': services
+    })
+
+# --- VISTA: ELIMINAR SERVICIO ---
+@login_required
+def delete_service_view(request, service_id):
+    # Obtener el servicio (asegurando que pertenezca al usuario actual)
+    service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
+    
+    if request.method == 'POST':
+        service.delete()
+        messages.success(request, "Servicio eliminado correctamente.")
+        
+    return redirect('services')

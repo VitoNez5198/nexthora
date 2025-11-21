@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Mis Servicios - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+
+    <!-- ENCABEZADO -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-dark-gray">✂️ Mis Servicios</h1>
+        <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-primary text-sm">← Volver al Dashboard</a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- COLUMNA IZQ: FORMULARIO DE CREACIÓN -->
+        <div class="lg:col-span-1">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-6">
+                <h2 class="text-lg font-bold text-dark-gray mb-4">Nuevo Servicio</h2>
+                <form method="POST" action="{% url 'services' %}">
+                    {% csrf_token %}
+
+                    <div class="space-y-4">
+                        <!-- Renderizamos los campos manualmente o con un bucle para usar los widgets definidos en forms.py -->
+                        {% for field in form %}
+                        <div>
+                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                            {% endif %}
+                            {% for error in field.errors %}
+                            <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <button type="submit"
+                        class="w-full mt-6 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium transition">
+                        + Agregar Servicio
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- COLUMNA DER: LISTA DE SERVICIOS -->
+        <div class="lg:col-span-2">
+            <h2 class="text-lg font-bold text-dark-gray mb-4">Tus Servicios Activos</h2>
+
+            {% if services %}
+            <div class="space-y-4">
+                {% for service in services %}
+                <div
+                    class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center group hover:border-primary transition-colors">
+                    <div>
+                        <h3 class="font-bold text-gray-800 text-lg">{{ service.name }}</h3>
+                        <div class="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                            <span class="flex items-center gap-1">⏱️ {{ service.duration_minutes }} min</span>
+                            <span class="flex items-center gap-1">💲 ${{ service.price|default:"0" }}</span>
+                        </div>
+                        {% if service.description %}
+                        <p class="text-gray-400 text-sm mt-2 line-clamp-1">{{ service.description }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <!-- Botón de Borrar (con confirmación simple) -->
+                        <form method="POST" action="{% url 'delete_service' service.id %}"
+                            onsubmit="return confirm('¿Estás seguro de eliminar este servicio?');">
+                            {% csrf_token %}
+                            <button type="submit"
+                                class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition"
+                                title="Eliminar">
+                                🗑️
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Estado Vacío -->
+            <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
+                <div class="text-4xl mb-3">✂️</div>
+                <h3 class="text-gray-900 font-medium">No tienes servicios aún</h3>
+                <p class="text-gray-500 text-sm mt-1">Usa el formulario de la izquierda para agregar tu primer servicio.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}
