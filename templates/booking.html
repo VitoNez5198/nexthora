@@ -5,9 +5,11 @@
 {% block content %}
 <div class="max-w-md mx-auto py-10">
 
+    <!-- Botón Volver -->
     <a href="{% url 'public_profile' profile.slug %}" class="text-sm text-gray-500 mb-4 block hover:text-primary">←
         Volver al perfil</a>
 
+    <!-- Tarjeta Resumen del Servicio -->
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
         <h1 class="text-xl font-bold text-gray-900">{{ service.name }}</h1>
         <p class="text-gray-500">con {{ profile.display_name }}</p>
@@ -20,18 +22,22 @@
     <!-- SELECTOR DE FECHA -->
     <form method="GET" class="mb-8">
         <label class="block text-sm font-medium text-gray-700 mb-2">Selecciona una fecha:</label>
+        <!-- El onchange envía el formulario automáticamente al elegir fecha -->
         <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" onchange="this.form.submit()"
             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary shadow-sm">
     </form>
 
-    <!-- LISTA DE HORAS -->
+    <!-- LISTA DE HORAS DISPONIBLES -->
     <div>
         <h2 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Horas disponibles</h2>
 
         {% if available_slots %}
         <div class="grid grid-cols-3 gap-3">
             {% for slot in available_slots %}
-            <!-- ESTE LINK LLEVA AL PASO 2 (CONFIRMACIÓN) -->
+            <!-- 
+                    AQUÍ ESTÁ LA MAGIA:
+                    Este botón lleva al PASO 2 (booking_confirm.html) llevando la fecha y hora.
+                -->
             <a href="{% url 'booking_step2' profile.slug service.id %}?date={{ selected_date|date:'Y-m-d' }}&time={{ slot|time:'H:i' }}"
                 class="block text-center py-3 bg-white border border-primary text-primary rounded-lg hover:bg-primary hover:text-white transition font-medium shadow-sm">
                 {{ slot|time:"H:i" }}
@@ -39,9 +45,10 @@
             {% endfor %}
         </div>
         {% else %}
+        <!-- Mensaje si no hay horas -->
         <div class="text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
             <p class="text-gray-500">No hay horas disponibles para este día.</p>
-            <p class="text-sm text-gray-400 mt-1">Prueba seleccionando otra fecha.</p>
+            <p class="text-sm text-gray-400 mt-1">Intenta seleccionando otra fecha en el calendario de arriba.</p>
         </div>
         {% endif %}
     </div>
