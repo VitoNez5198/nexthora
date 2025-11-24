@@ -11,11 +11,11 @@
         <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-primary text-sm">← Volver al Dashboard</a>
     </div>
 
-    <!-- MENSAJES DE ERROR/EXITO -->
+    <!-- MENSAJES -->
     {% if messages %}
-        <div class="mb-6">
+        <div class="mb-6 space-y-2">
             {% for message in messages %}
-                <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+                <div class="p-4 rounded-lg text-sm border {% if message.tags == 'success' %}bg-green-50 text-green-700 border-green-200{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-700 border-yellow-200{% else %}bg-red-50 text-red-700 border-red-200{% endif %}">
                     {{ message }}
                 </div>
             {% endfor %}
@@ -24,107 +24,139 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        <!-- SECCIÓN 1: HORARIO SEMANAL -->
+        <!-- SECCIÓN 1: HORARIO SEMANAL (BATCH) -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-lg font-bold text-dark-gray mb-4 flex items-center gap-2">
                 🔄 Horario Semanal
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">Se repite siempre</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">Selección Múltiple</span>
             </h2>
             
-            <form method="POST" class="mb-6 bg-gray-50 p-4 rounded-md border border-gray-200">
+            <form method="POST" class="mb-6 bg-gray-50 p-5 rounded-md border border-gray-200">
                 {% csrf_token %}
-                <div class="space-y-3">
-                    <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Día</label>
-                        {{ hours_form.weekday }}
+                
+                <!-- SELECCIÓN DE DÍAS (Checkboxes visuales) -->
+                <div class="mb-4">
+                    <label class="text-xs font-bold text-gray-500 uppercase block mb-2">Selecciona los días</label>
+                    <div class="flex justify-between gap-1">
+                        {% for checkbox in hours_form.days %}
+                        <label class="cursor-pointer">
+                            <!-- Renderizamos el input checkbox oculto -->
+                            {{ checkbox.tag }}
+                            <!-- Estilo visual del botón -->
+                            <div class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 font-bold text-sm transition-all peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary hover:bg-gray-100">
+                                {{ checkbox.choice_label }}
+                            </div>
+                        </label>
+                        {% endfor %}
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Desde</label>
-                            {{ hours_form.start_time }}
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Hasta</label>
-                            {{ hours_form.end_time }}
-                        </div>
-                    </div>
-                    <button type="submit" name="submit_hours" class="w-full bg-primary text-white py-2 rounded hover:bg-blue-700 text-sm font-bold">
-                        + Añadir Horario
-                    </button>
+                    <!-- Hack CSS para que el estilo peer-checked funcione con el input generado por Django -->
+                    <style>
+                        input[type="checkbox"]:checked + div {
+                            background-color: #3B82F6; /* primary */
+                            color: white;
+                            border-color: #3B82F6;
+                        }
+                    </style>
                 </div>
+
+                <!-- SELECCIÓN DE HORAS -->
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Desde</label>
+                        {{ hours_form.start_time }}
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Hasta</label>
+                        {{ hours_form.end_time }}
+                    </div>
+                </div>
+
+                <button type="submit" name="submit_hours" class="w-full bg-primary text-white py-2.5 rounded-md hover:bg-blue-700 text-sm font-bold shadow-sm transition-colors">
+                    + Agregar Bloque
+                </button>
             </form>
 
-            <div class="space-y-2 max-h-60 overflow-y-auto">
-                {% for hours in schedule %}
-                <div class="flex justify-between items-center text-sm border-b border-gray-100 pb-2 last:border-0">
-                    <div>
-                        <span class="font-bold text-gray-700">{{ hours.get_weekday_display }}</span>
-                        <span class="text-gray-500 ml-2">{{ hours.start_time|time:"H:i" }} - {{ hours.end_time|time:"H:i" }}</span>
+            <!-- Lista de Horarios Actuales -->
+            <div class="space-y-2 max-h-80 overflow-y-auto pr-1">
+                {% regroup schedule by get_weekday_display as day_list %}
+                
+                {% for day in day_list %}
+                <div class="border rounded-md overflow-hidden">
+                    <div class="bg-gray-100 px-3 py-1.5 text-xs font-bold text-gray-600 uppercase border-b border-gray-200">
+                        {{ day.grouper }}
                     </div>
-                    <form method="POST" action="{% url 'delete_schedule' hours.id %}" onsubmit="return confirm('¿Borrar este horario?');">
-                        {% csrf_token %}
-                        <button type="submit" class="text-red-400 hover:text-red-600 font-bold px-2">✕</button>
-                    </form>
+                    <div class="bg-white divide-y divide-gray-100">
+                        {% for hours in day.list %}
+                        <div class="flex justify-between items-center px-3 py-2 text-sm">
+                            <span class="text-gray-700 font-mono">{{ hours.start_time|time:"H:i" }} - {{ hours.end_time|time:"H:i" }}</span>
+                            <form method="POST" action="{% url 'delete_schedule' hours.id %}" onsubmit="return confirm('¿Borrar?');">
+                                {% csrf_token %}
+                                <button type="submit" class="text-gray-400 hover:text-red-500 transition px-2">✕</button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
                 {% empty %}
-                <p class="text-gray-400 text-sm text-center italic">No has definido horarios recurrentes.</p>
+                <div class="text-center py-8 text-gray-400 text-sm">
+                    <p>No has configurado tu semana laboral.</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
 
-        <!-- SECCIÓN 2: DÍAS BLOQUEADOS (Con validación JS) -->
+        <!-- SECCIÓN 2: DÍAS BLOQUEADOS (VACACIONES) - SE MANTIENE IGUAL -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-lg font-bold text-dark-gray mb-4 flex items-center gap-2">
                 🚫 Bloquear Fechas
-                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">Vacaciones / Feriados</span>
+                <span class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">Excepciones</span>
             </h2>
 
-            <form method="POST" class="mb-6 bg-red-50 p-4 rounded-md border border-red-100">
+            <form method="POST" class="mb-6 bg-red-50 p-5 rounded-md border border-red-100">
                 {% csrf_token %}
                 <div class="space-y-3">
-                    <div class="grid grid-cols-2 gap-2">
+                    <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Desde Fecha</label>
-                            <!-- Añadimos ID para JS -->
-                            <input type="date" name="off-start_date" id="start_date" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary text-sm">
+                            <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Desde</label>
+                            <input type="date" name="off-start_date" id="start_date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 text-sm">
                         </div>
                         <div>
-                            <label class="text-xs font-bold text-gray-500 uppercase">Hasta Fecha</label>
-                            <!-- Añadimos ID para JS -->
-                            <input type="date" name="off-end_date" id="end_date" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary text-sm">
+                            <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Hasta</label>
+                            <input type="date" name="off-end_date" id="end_date" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-red-500 text-sm">
                         </div>
                     </div>
                     <div>
-                        <label class="text-xs font-bold text-gray-500 uppercase">Motivo</label>
+                        <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Motivo</label>
                         {{ timeoff_form.description }}
                     </div>
-                    <button type="submit" name="submit_off" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-700 text-sm font-bold">
+                    <button type="submit" name="submit_off" class="w-full bg-red-500 text-white py-2.5 rounded-md hover:bg-red-700 text-sm font-bold shadow-sm transition-colors">
                         + Bloquear Rango
                     </button>
                 </div>
             </form>
 
-            <div class="space-y-2 max-h-60 overflow-y-auto">
+            <div class="space-y-2 max-h-80 overflow-y-auto">
                 {% for off in time_off_list %}
-                <div class="flex justify-between items-center text-sm border-b border-gray-100 pb-2 last:border-0">
+                <div class="flex justify-between items-center text-sm bg-white border border-gray-200 p-3 rounded-md shadow-sm">
                     <div>
-                        <div class="font-bold text-gray-700">
-                            {{ off.start_date|date:"d M Y" }} 
-                            {% if off.start_date != off.end_date %} - {{ off.end_date|date:"d M Y" }} {% endif %}
+                        <div class="font-bold text-gray-800 flex items-center gap-2">
+                            <span>📅</span>
+                            {{ off.start_date|date:"d M" }} 
+                            {% if off.start_date != off.end_date %} - {{ off.end_date|date:"d M" }} {% endif %}
                         </div>
                         {% if off.description %}
-                        <div class="text-xs text-gray-500">{{ off.description }}</div>
+                        <div class="text-xs text-gray-500 mt-0.5 ml-6">{{ off.description }}</div>
                         {% endif %}
                     </div>
-                    <form method="POST" action="{% url 'delete_timeoff' off.id %}" onsubmit="return confirm('¿Desbloquear estos días?');">
+                    <form method="POST" action="{% url 'delete_timeoff' off.id %}" onsubmit="return confirm('¿Desbloquear?');">
                         {% csrf_token %}
-                        <button type="submit" class="text-red-400 hover:text-red-600 font-bold px-2">✕</button>
+                        <button type="submit" class="text-gray-400 hover:text-red-500 p-1">✕</button>
                     </form>
                 </div>
                 {% empty %}
-                <p class="text-gray-400 text-sm text-center italic">No tienes días bloqueados.</p>
+                <div class="text-center py-8 text-gray-400 text-sm">
+                    <p>Tu agenda está 100% abierta según el horario semanal.</p>
+                </div>
                 {% endfor %}
             </div>
         </div>
@@ -132,25 +164,24 @@
     </div>
 </div>
 
+<!-- JS para validación de fechas (TimeOff) -->
 <script>
-    // Script para mejorar la usabilidad de las fechas
     document.addEventListener('DOMContentLoaded', function() {
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
         
-        // 1. Establecer el mínimo a "HOY" para evitar bloquear el pasado accidentalmente
-        const today = new Date().toISOString().split('T')[0];
-        startDateInput.setAttribute('min', today);
-        endDateInput.setAttribute('min', today);
+        if(startDateInput && endDateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            startDateInput.setAttribute('min', today);
+            endDateInput.setAttribute('min', today);
 
-        // 2. Cuando cambie la fecha de inicio, actualizar el mínimo de la fecha fin
-        startDateInput.addEventListener('change', function() {
-            endDateInput.setAttribute('min', this.value);
-            // Si la fecha fin es menor a la nueva fecha inicio, la actualizamos
-            if (endDateInput.value && endDateInput.value < this.value) {
-                endDateInput.value = this.value;
-            }
-        });
+            startDateInput.addEventListener('change', function() {
+                endDateInput.setAttribute('min', this.value);
+                if (endDateInput.value && endDateInput.value < this.value) {
+                    endDateInput.value = this.value;
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

@@ -1,39 +1,19 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django import forms  # <--- CAMBIO IMPORTANTE AQUÍ
-from .models import Service
-from .models import BusinessHours # Asegúrate de importar el modelo
-from .models import Service, BusinessHours, TimeOff # Importa TimeOff
-
-
+from django import forms
+from .models import Service, BusinessHours, TimeOff
+import datetime
 
 class NexthoraUserCreationForm(UserCreationForm):
-    """
-    Un formulario personalizado para crear un usuario.
-    Hereda TODO de UserCreationForm (incluida la validación de 
-    contraseña, que usa un campo llamado 'password2').
-    
-    Nosotros solo le AÑADIMOS el campo 'email'.
-    """
-    # Ahora usamos forms.EmailField porque importamos 'django import forms'
-    email = forms.EmailField(
-        required=True, 
-        help_text="Requerido. Ingresa un email válido."
-    )
-
+    email = forms.EmailField(required=True, help_text="Requerido. Ingresa un email válido.")
     class Meta(UserCreationForm.Meta):
         model = User
-        # Le decimos que use los campos del padre, MÁS el email.
         fields = UserCreationForm.Meta.fields + ("email",)
-
     def save(self, commit=True):
-        # Sobrescribimos el 'save' para asegurar que el email se guarde
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
-        if commit:
-            user.save()
+        if commit: user.save()
         return user
-
 
 class ServiceForm(forms.ModelForm):
     class Meta:
@@ -53,30 +33,49 @@ class ServiceForm(forms.ModelForm):
             'price': 'Precio (CLP)',
             'is_active': 'Activo (Visible para clientes)',
         }
-        
-class BusinessHoursForm(forms.ModelForm):
-    class Meta:
-        model = BusinessHours
-        fields = ['weekday', 'start_time', 'end_time']
-        widgets = {
-            'weekday': forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary'}),
-            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary'}),
-        }
-        labels = {
-            'weekday': 'Día de la Semana',
-            'start_time': 'Hora de Inicio',
-            'end_time': 'Hora de Fin',
-        }
+
+class BatchScheduleForm(forms.Form):
+    WEEKDAYS = [(0, "Lu"), (1, "Ma"), (2, "Mi"), (3, "Ju"), (4, "Vi"), (5, "Sa"), (6, "Do")]
+    TIME_CHOICES = []
+    for h in range(24):
+        for m in (0, 30):
+            time_str = f"{h:02}:{m:02}"
+            TIME_CHOICES.append((time_str, time_str))
     
-    # Validación personalizada: Fin debe ser después de Inicio
+    days = forms.MultipleChoiceField(
+        choices=WEEKDAYS,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'hidden'}), 
+        label="Días"
+    )
+    
+    start_time = forms.ChoiceField(
+        choices=TIME_CHOICES,
+        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary bg-white text-center font-mono cursor-pointer'}),
+        label="Desde", initial="09:00"
+    )
+    
+    end_time = forms.ChoiceField(
+        choices=TIME_CHOICES,
+        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary bg-white text-center font-mono cursor-pointer'}),
+        label="Hasta", initial="18:00"
+    )
+
     def clean(self):
         cleaned_data = super().clean()
-        start_time = cleaned_data.get("start_time")
-        end_time = cleaned_data.get("end_time")
-
-        if start_time and end_time and start_time >= end_time:
-            raise forms.ValidationError("La hora de fin debe ser posterior a la hora de inicio.")
+        start_str = cleaned_data.get("start_time")
+        end_str = cleaned_data.get("end_time")
+        
+        if start_str and end_str:
+            start = datetime.datetime.strptime(start_str, "%H:%M").time()
+            end = datetime.datetime.strptime(end_str, "%H:%M").time()
+            
+            if start >= end:
+                raise forms.ValidationError("La hora de término debe ser después del inicio.")
+            
+            cleaned_data['start_time'] = start
+            cleaned_data['end_time'] = end
+            
+        return cleaned_data
 
 class TimeOffForm(forms.ModelForm):
     class Meta:
@@ -87,11 +86,7 @@ class TimeOffForm(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary'}),
             'description': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary', 'placeholder': 'Ej: Vacaciones'}),
         }
-        labels = {
-            'start_date': 'Desde',
-            'end_date': 'Hasta',
-            'description': 'Motivo (Opcional)',
-        }
+        labels = { 'start_date': 'Desde', 'end_date': 'Hasta', 'description': 'Motivo (Opcional)' }
     
     def clean(self):
         cleaned_data = super().clean()
