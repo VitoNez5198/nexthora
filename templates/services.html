@@ -11,6 +11,18 @@
         <a href="{% url 'dashboard' %}" class="text-gray-500 hover:text-primary text-sm">← Volver al Dashboard</a>
     </div>
 
+    <!-- MENSAJES (Éxito/Error) -->
+    {% if messages %}
+    <div class="mb-6">
+        {% for message in messages %}
+        <div
+            class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         <!-- COLUMNA IZQ: FORMULARIO DE CREACIÓN -->
@@ -24,7 +36,7 @@
                     {% else %} bg-blue-50 text-blue-700 border border-blue-200 {% endif %}">
                     <span>Usados: {{ services_count }} / {{ service_limit }}</span>
                     {% if services_count >= service_limit %}
-                    <span>🔒 Lleno</span>
+                    <span class="text-xs bg-white px-2 py-1 rounded border border-red-200">🔒 Lleno</span>
                     {% endif %}
                 </div>
 
@@ -51,9 +63,11 @@
                     </button>
                     </form>
                     {% else %}
-                    <div class="text-center py-4 text-gray-500 text-sm">
-                        Has alcanzado el límite de servicios de tu plan gratuito.
-                        Elimina uno para crear otro.
+                    <div class="text-center py-6 bg-gray-50 rounded border border-dashed border-gray-300">
+                        <p class="text-gray-500 text-sm">
+                            Has alcanzado el límite de servicios. <br>
+                            <span class="font-bold text-dark-gray">Elimina uno</span> para crear otro nuevo.
+                        </p>
                     </div>
                     {% endif %}
             </div>
@@ -67,7 +81,7 @@
             <div class="space-y-4">
                 {% for service in services %}
                 <div
-                    class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center group hover:border-primary transition-colors {% if not service.is_active %} opacity-60 bg-gray-50 {% endif %}">
+                    class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center group hover:border-primary transition-colors {% if not service.is_active %} opacity-75 bg-gray-50 {% endif %}">
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="font-bold text-gray-800 text-lg">{{ service.name }}</h3>
@@ -91,7 +105,7 @@
                         <a href="{% url 'toggle_service' service.id %}"
                             class="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition"
                             title="{% if service.is_active %}Ocultar{% else %}Mostrar{% endif %}">
-                            {% if service.is_active %} 👁️ {% else %} 👁️ {% endif %}
+                            {% if service.is_active %} 👁️ {% else %} 🙈 {% endif %}
                         </a>
 
                         <!-- Botón Editar (Lápiz) -->

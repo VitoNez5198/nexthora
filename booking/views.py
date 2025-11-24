@@ -1,3 +1,4 @@
+# ... (MANTÉN TUS IMPORTACIONES ARRIBA IGUAL QUE ANTES) ...
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -5,17 +6,12 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
-
-# Importación de Formularios y Modelos
 from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
-# ... (Tus vistas index_view, register_view, login_view, dashboard_view SE QUEDAN IGUAL) ...
-# ... Copia y pega las vistas que no cambian, aquí resumo las importantes ...
-
+# ... (Tus vistas index, register, login, dashboard SE QUEDAN IGUAL) ...
 def index_view(request):
-    if request.user.is_authenticated:
-        return redirect('dashboard')
+    if request.user.is_authenticated: return redirect('dashboard')
     return redirect('register')
 
 def register_view(request):
@@ -24,30 +20,35 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f"¡Bienvenido, {user.username}! Tu cuenta ha sido creada.")
+            messages.success(request, f"¡Bienvenido, {user.username}!")
             return redirect('dashboard')
-        else:
-            messages.error(request, "Hubo un error en el registro. Revisa los campos.")
     else:
         form = NexthoraUserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-def login_view(request):
-    return redirect('register') 
+def login_view(request): return redirect('register') 
 
 @login_required
-def dashboard_view(request):
-    return render(request, 'dashboard.html')
+def dashboard_view(request): return render(request, 'dashboard.html')
 
+# --- GESTIÓN DE SERVICIOS (AQUÍ ESTÁ LA LÓGICA DEL LÍMITE) ---
 @login_required
 def services_view(request):
     try:
         profile = request.user.profile
     except ProfessionalProfile.DoesNotExist:
-        messages.error(request, "Error: Perfil no encontrado.")
         return redirect('dashboard')
 
+    services = Service.objects.filter(professional=profile).order_by('name')
+    services_count = services.count()
+    SERVICE_LIMIT = 2  # <--- ¡AQUÍ ESTÁ EL LÍMITE! CÁMBIALO A 10 SI QUIERES PROBAR MÁS
+
     if request.method == 'POST':
+        # Si ya alcanzó el límite, mostramos error y NO guardamos
+        if services_count >= SERVICE_LIMIT:
+            messages.error(request, f"Límite alcanzado ({SERVICE_LIMIT}). Elimina un servicio para crear otro.")
+            return redirect('services')
+
         form = ServiceForm(request.POST)
         if form.is_valid():
             service = form.save(commit=False)
@@ -60,9 +61,14 @@ def services_view(request):
     else:
         form = ServiceForm()
 
-    services = Service.objects.filter(professional=profile)
-    return render(request, 'services.html', {'form': form, 'services': services})
+    return render(request, 'services.html', {
+        'form': form,
+        'services': services,
+        'services_count': services_count,
+        'service_limit': SERVICE_LIMIT
+    })
 
+# ... (MANTÉN EL RESTO DE TUS VISTAS IGUAL: edit, toggle, delete, schedule...) ...
 @login_required
 def edit_service_view(request, service_id):
     service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
@@ -70,7 +76,7 @@ def edit_service_view(request, service_id):
         form = ServiceForm(request.POST, instance=service)
         if form.is_valid():
             form.save()
-            messages.success(request, "Servicio actualizado correctamente.")
+            messages.success(request, "Servicio actualizado.")
             return redirect('services')
     else:
         form = ServiceForm(instance=service)
@@ -82,7 +88,7 @@ def toggle_service_view(request, service_id):
     service.is_active = not service.is_active
     service.save()
     estado = "visible" if service.is_active else "oculto"
-    messages.success(request, f"El servicio '{service.name}' ahora está {estado}.")
+    messages.success(request, f"Servicio {estado}.")
     return redirect('services')
 
 @login_required

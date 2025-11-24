@@ -1,20 +1,25 @@
+from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from django import forms
 from .models import Service, BusinessHours, TimeOff
 import datetime
 
+# --- FORMULARIO DE REGISTRO ---
 class NexthoraUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text="Requerido. Ingresa un email válido.")
+    
     class Meta(UserCreationForm.Meta):
         model = User
         fields = UserCreationForm.Meta.fields + ("email",)
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
-        if commit: user.save()
+        if commit:
+            user.save()
         return user
 
+# --- FORMULARIO DE SERVICIOS ---
 class ServiceForm(forms.ModelForm):
     class Meta:
         model = Service
@@ -31,9 +36,10 @@ class ServiceForm(forms.ModelForm):
             'description': 'Descripción (Opcional)',
             'duration_minutes': 'Duración (minutos)',
             'price': 'Precio (CLP)',
-            'is_active': 'Activo (Visible para clientes)',
+            'is_active': 'Activo (Visible)',
         }
 
+# --- FORMULARIO DE HORARIO POR LOTES ---
 class BatchScheduleForm(forms.Form):
     WEEKDAYS = [(0, "Lu"), (1, "Ma"), (2, "Mi"), (3, "Ju"), (4, "Vi"), (5, "Sa"), (6, "Do")]
     TIME_CHOICES = []
@@ -47,13 +53,11 @@ class BatchScheduleForm(forms.Form):
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'hidden'}), 
         label="Días"
     )
-    
     start_time = forms.ChoiceField(
         choices=TIME_CHOICES,
         widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary bg-white text-center font-mono cursor-pointer'}),
         label="Desde", initial="09:00"
     )
-    
     end_time = forms.ChoiceField(
         choices=TIME_CHOICES,
         widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary bg-white text-center font-mono cursor-pointer'}),
@@ -64,19 +68,16 @@ class BatchScheduleForm(forms.Form):
         cleaned_data = super().clean()
         start_str = cleaned_data.get("start_time")
         end_str = cleaned_data.get("end_time")
-        
         if start_str and end_str:
             start = datetime.datetime.strptime(start_str, "%H:%M").time()
             end = datetime.datetime.strptime(end_str, "%H:%M").time()
-            
             if start >= end:
                 raise forms.ValidationError("La hora de término debe ser después del inicio.")
-            
             cleaned_data['start_time'] = start
             cleaned_data['end_time'] = end
-            
         return cleaned_data
 
+# --- FORMULARIO DE DÍAS BLOQUEADOS ---
 class TimeOffForm(forms.ModelForm):
     class Meta:
         model = TimeOff
@@ -86,7 +87,7 @@ class TimeOffForm(forms.ModelForm):
             'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary'}),
             'description': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary', 'placeholder': 'Ej: Vacaciones'}),
         }
-        labels = { 'start_date': 'Desde', 'end_date': 'Hasta', 'description': 'Motivo (Opcional)' }
+        labels = { 'start_date': 'Desde', 'end_date': 'Hasta', 'description': 'Motivo' }
     
     def clean(self):
         cleaned_data = super().clean()
