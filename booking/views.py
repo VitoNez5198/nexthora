@@ -50,7 +50,17 @@ def services_view(request):
         messages.error(request, "Error: Perfil no encontrado.")
         return redirect('dashboard')
 
+    # Obtener servicios actuales
+    services = Service.objects.filter(professional=profile).order_by('name')
+    services_count = services.count()
+    SERVICE_LIMIT = 2 # Límite Freemium
+
     if request.method == 'POST':
+        # VALIDACIÓN FREEMIUM: Impedir crear si ya tiene 2
+        if services_count >= SERVICE_LIMIT:
+            messages.error(request, f"Plan Gratuito: Límite alcanzado ({SERVICE_LIMIT} servicios). Edita o elimina uno existente.")
+            return redirect('services')
+
         form = ServiceForm(request.POST)
         if form.is_valid():
             service = form.save(commit=False)
@@ -63,8 +73,40 @@ def services_view(request):
     else:
         form = ServiceForm()
 
-    services = Service.objects.filter(professional=profile)
-    return render(request, 'services.html', {'form': form, 'services': services})
+    return render(request, 'services.html', {
+        'form': form, 
+        'services': services,
+        'services_count': services_count,
+        'service_limit': SERVICE_LIMIT
+    })
+
+# --- NUEVO: EDITAR SERVICIO ---
+@login_required
+def edit_service_view(request, service_id):
+    service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
+    
+    if request.method == 'POST':
+        form = ServiceForm(request.POST, instance=service)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Servicio actualizado correctamente.")
+            return redirect('services')
+    else:
+        form = ServiceForm(instance=service)
+    
+    return render(request, 'service_edit.html', {'form': form, 'service': service})
+
+# --- NUEVO: ACTIVAR/DESACTIVAR (VISIBILIDAD) ---
+@login_required
+def toggle_service_view(request, service_id):
+    service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
+    # Invertir estado
+    service.is_active = not service.is_active
+    service.save()
+    
+    estado = "visible" if service.is_active else "oculto"
+    messages.success(request, f"El servicio '{service.name}' ahora está {estado}.")
+    return redirect('services')
 
 @login_required
 def delete_service_view(request, service_id):

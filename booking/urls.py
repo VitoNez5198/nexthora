@@ -17,9 +17,10 @@ urlpatterns = [
     # Esta es la ruta real para "Mis Servicios"
     path('dashboard/services/', views.services_view, name='services'), 
     
-    # Ruta para eliminar un servicio específico
+     # NUEVAS RUTAS:
+    path('dashboard/services/edit/<int:service_id>/', views.edit_service_view, name='edit_service'),
+    path('dashboard/services/toggle/<int:service_id>/', views.toggle_service_view, name='toggle_service'),
     path('dashboard/services/delete/<int:service_id>/', views.delete_service_view, name='delete_service'),
-    
     # --- GESTIÓN DE HORARIOS ---
     # Esta es la ruta real para "Mi Horario"
     path('dashboard/schedule/', views.schedule_view, name='schedule'),

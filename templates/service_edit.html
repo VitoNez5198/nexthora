@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Servicio - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto py-10">
+    
+    <a href="{% url 'services' %}" class="text-sm text-gray-500 mb-4 block hover:text-primary">← Volver a Mis Servicios</a>
+
+    <div class="bg-white p-8 rounded-lg shadow-lg border border-gray-200">
+        <h1 class="text-2xl font-bold text-dark-gray mb-6">Editar Servicio</h1>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <div class="space-y-4">
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <p class="text-xs text-gray-500 mt-1">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-700 font-medium transition">
+                    Guardar Cambios
+                </button>
+                <a href="{% url 'services' %}" class="flex-1 text-center border border-gray-300 text-gray-600 py-2 px-4 rounded-md hover:bg-gray-50 font-medium transition">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
