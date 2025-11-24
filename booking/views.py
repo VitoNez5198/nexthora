@@ -9,6 +9,7 @@ from datetime import datetime, timedelta, date, time
 from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
+
 # ... (Tus vistas index, register, login, dashboard SE QUEDAN IGUAL) ...
 def index_view(request):
     if request.user.is_authenticated: return redirect('dashboard')
@@ -29,7 +30,41 @@ def register_view(request):
 def login_view(request): return redirect('register') 
 
 @login_required
-def dashboard_view(request): return render(request, 'dashboard.html')
+def dashboard_view(request):
+    profile = request.user.profile
+    
+    # Obtener fecha y hora actual en la zona horaria correcta
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    tomorrow = today + timedelta(days=1)
+
+    # 1. Citas de HOY (Ordenadas por hora)
+    today_appointments = Appointment.objects.filter(
+        professional=profile,
+        start_datetime__date=today,
+        status='CONFIRMED'
+    ).order_by('start_datetime')
+
+    # 2. Citas de MAÑANA
+    tomorrow_appointments = Appointment.objects.filter(
+        professional=profile,
+        start_datetime__date=tomorrow,
+        status='CONFIRMED'
+    ).order_by('start_datetime')
+
+    # (Opcional) Próximas citas después de mañana
+    future_appointments = Appointment.objects.filter(
+        professional=profile,
+        start_datetime__date__gt=tomorrow,
+        status='CONFIRMED'
+    ).order_by('start_datetime')[:5]
+
+    return render(request, 'dashboard.html', {
+        'today_appointments': today_appointments,
+        'tomorrow_appointments': tomorrow_appointments,
+        'today_date': today,
+        'tomorrow_date': tomorrow
+    })
 
 # --- GESTIÓN DE SERVICIOS (AQUÍ ESTÁ LA LÓGICA DEL LÍMITE) ---
 @login_required
@@ -247,8 +282,10 @@ def booking_view(request, profile_slug, service_id):
 def booking_confirm_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
     service = get_object_or_404(Service, id=service_id, professional=profile)
+    
     date_str = request.GET.get('date')
     time_str = request.GET.get('time')
+    
     if request.method == 'POST':
         client_name = request.POST.get('client_name')
         client_last_name = request.POST.get('client_last_name')
@@ -263,16 +300,40 @@ def booking_confirm_view(request, profile_slug, service_id):
             })
 
         try:
-            start_datetime_str = f"{date_str} {time_str}"
-            start_datetime = datetime.strptime(start_datetime_str, '%Y-%m-%d %H:%M')
+            # 1. Crear datetime "naive" (sin zona horaria)
+            start_datetime_naive = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
+            
+            # 2. Convertirlo a "aware" (con zona horaria actual del proyecto)
+            # Esto le pega la etiqueta "America/Santiago" (o la que tengas en settings)
+            current_tz = timezone.get_current_timezone()
+            start_datetime = current_tz.localize(start_datetime_naive)
+            
+            # 3. Crear la cita
             appointment = Appointment.objects.create(
-                professional=profile, service=service, client_name=client_name,
-                client_last_name=client_last_name, client_rut=client_rut,
-                client_email=client_email, client_whatsapp=client_whatsapp,
+                professional=profile,
+                service=service,
+                client_name=client_name,
+                client_last_name=client_last_name,
+                client_rut=client_rut,
+                client_email=client_email,
+                client_whatsapp=client_whatsapp,
                 start_datetime=start_datetime
             )
-            return render(request, 'success.html', {'service': service, 'appointment': appointment, 'profile': profile})
+            
+            return render(request, 'success.html', {
+                'service': service, 
+                'appointment': appointment,
+                'profile': profile
+            })
+            
         except Exception as e:
-            messages.error(request, f"Error al agendar: {e}")
+            # Imprimimos el error en la consola para verlo claro si falla
+            print(f"ERROR AL AGENDAR: {e}")
+            messages.error(request, f"Error al agendar. Inténtalo de nuevo. ({e})")
 
-    return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
+    return render(request, 'booking_confirm.html', {
+        'profile': profile,
+        'service': service,
+        'date_str': date_str,
+        'time_str': time_str
+    })
