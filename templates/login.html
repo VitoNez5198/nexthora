@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Nexthora{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-[80vh] py-10">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-xl border border-gray-100">
+
+        <div class="text-center">
+            <h2 class="text-3xl font-bold text-dark-gray">Bienvenido</h2>
+            <p class="mt-2 text-gray-500">Ingresa a tu cuenta para gestionar tu agenda.</p>
+        </div>
+
+        <!-- Mensajes de Error -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="p-4 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Usuario -->
+            <div>
+                <label for="username" class="block text-sm font-medium text-gray-700">Nombre de Usuario</label>
+                <input type="text" name="username" id="username" required
+                    class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary shadow-sm transition-colors">
+            </div>
+
+            <!-- Contraseña -->
+            <div>
+                <div class="flex justify-between items-center">
+                    <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <!-- (Opcional: Link a recuperar contraseña) -->
+                    <!-- <a href="#" class="text-xs text-primary hover:underline">¿Olvidaste tu contraseña?</a> -->
+                </div>
+                <input type="password" name="password" id="password" required
+                    class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-primary focus:border-primary shadow-sm transition-colors">
+            </div>
+
+            <!-- Botón -->
+            <button type="submit"
+                class="w-full px-4 py-2 text-white bg-primary rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 transition-all shadow-md font-semibold text-lg">
+                Entrar
+            </button>
+        </form>
+
+        <!-- Link a Registro -->
+        <p class="text-sm text-center text-gray-600">
+            ¿No tienes cuenta?
+            <a href="{% url 'register' %}" class="font-medium text-primary hover:underline">Regístrate gratis</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

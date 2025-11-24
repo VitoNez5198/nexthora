@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth.views import LogoutView 
 from . import views
 
 urlpatterns = [
@@ -6,6 +7,8 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+
 
     # --- NUEVAS RUTAS (Placeholders para que el dashboard no falle) ---
     # Usaremos 'dashboard_view' temporalmente hasta que creemos las vistas reales

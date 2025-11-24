@@ -1,4 +1,3 @@
-# ... (MANTÉN TUS IMPORTACIONES ARRIBA IGUAL QUE ANTES) ...
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
@@ -6,14 +5,20 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
+# Importación necesaria para el login
+from django.contrib.auth.forms import AuthenticationForm
+
+# Importación de Formularios y Modelos locales
 from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
 
+
 # ... (Tus vistas index, register, login, dashboard SE QUEDAN IGUAL) ...
 def index_view(request):
-    if request.user.is_authenticated: return redirect('dashboard')
-    return redirect('register')
+    if request.user.is_authenticated: 
+        return redirect('dashboard')
+    return redirect('login')
 
 def register_view(request):
     if request.method == 'POST':
@@ -27,7 +32,29 @@ def register_view(request):
         form = NexthoraUserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-def login_view(request): return redirect('register') 
+# --- VISTA DE LOGIN ---
+def login_view(request):
+    """
+    Maneja el inicio de sesión de los profesionales.
+    """
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.info(request, f"¡Hola de nuevo, {username}!")
+                return redirect('dashboard')
+            else:
+                messages.error(request, "Usuario o contraseña inválidos.")
+        else:
+            messages.error(request, "Usuario o contraseña inválidos.")
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'login.html', {'form': form})
 
 @login_required
 def dashboard_view(request):
