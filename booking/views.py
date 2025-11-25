@@ -26,7 +26,6 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f"¡Bienvenido, {user.username}!")
             return redirect('dashboard')
     else:
         form = NexthoraUserCreationForm()
@@ -45,7 +44,6 @@ def login_view(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.info(request, f"¡Hola de nuevo, {username}!")
                 return redirect('dashboard')
             else:
                 messages.error(request, "Usuario o contraseña inválidos.")
