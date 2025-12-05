@@ -329,9 +329,7 @@ def booking_confirm_view(request, profile_slug, service_id):
             start_datetime_naive = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
             
             # 2. Convertirlo a "aware" (con zona horaria actual del proyecto)
-            # Esto le pega la etiqueta "America/Santiago" (o la que tengas en settings)
-            current_tz = timezone.get_current_timezone()
-            start_datetime = current_tz.localize(start_datetime_naive)
+            start_datetime = timezone.make_aware(start_datetime_naive)
             
             # 3. Crear la cita
             appointment = Appointment.objects.create(
