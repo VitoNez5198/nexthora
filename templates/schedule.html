@@ -31,7 +31,8 @@
                 <span class="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-1 rounded">Selección Múltiple</span>
             </h2>
             
-            <form method="POST" class="mb-6 bg-gray-50 p-5 rounded-md border border-gray-200">
+            <!-- CORRECCIÓN AQUÍ: Se agregó id="batchScheduleForm" -->
+            <form method="POST" id="batchScheduleForm" class="mb-6 bg-gray-50 p-5 rounded-md border border-gray-200">
                 {% csrf_token %}
                 
                 <!-- SELECCIÓN DE DÍAS (Checkboxes visuales) -->
@@ -49,10 +50,9 @@
                         </label>
                         {% endfor %}
                     </div>
-                    <!-- Hack CSS para que el estilo peer-checked funcione con el input generado por Django -->
                     <style>
                         input[type="checkbox"]:checked + div {
-                            background-color: #3B82F6; /* primary */
+                            background-color: #3B82F6;
                             color: white;
                             border-color: #3B82F6;
                         }
@@ -69,6 +69,12 @@
                         <label class="text-xs font-bold text-gray-500 uppercase block mb-1">Hasta</label>
                         {{ hours_form.end_time }}
                     </div>
+                </div>
+
+                <!-- MENSAJE DE ERROR JS (OCULTO POR DEFECTO) -->
+                <div id="js-error-message" class="hidden mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md border border-red-200 flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span id="js-error-text">Debes seleccionar al menos un día.</span>
                 </div>
 
                 <button type="submit" name="submit_hours" class="w-full bg-primary text-white py-2.5 rounded-md hover:bg-blue-700 text-sm font-bold shadow-sm transition-colors">
@@ -105,7 +111,7 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 2: DÍAS BLOQUEADOS (VACACIONES) - SE MANTIENE IGUAL -->
+        <!-- SECCIÓN 2: DÍAS BLOQUEADOS (VACACIONES) -->
         <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <h2 class="text-lg font-bold text-dark-gray mb-4 flex items-center gap-2">
                 🚫 Bloquear Fechas
@@ -138,7 +144,7 @@
             <div class="space-y-2 max-h-80 overflow-y-auto">
                 {% for off in time_off_list %}
                 <div class="flex justify-between items-center text-sm bg-white border border-gray-200 p-3 rounded-md shadow-sm">
-                    <div>
+                    <div>154149150151152153144145146147148141142143139140137138133134135136132131130129128126127125155156157158159160161162163$0
                         <div class="font-bold text-gray-800 flex items-center gap-2">
                             <span>📅</span>
                             {{ off.start_date|date:"d M" }} 
@@ -164,9 +170,49 @@
     </div>
 </div>
 
-<!-- JS para validación de fechas (TimeOff) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        
+        // 1. VALIDACIÓN DEL FORMULARIO DE HORARIO (BATCH)
+        const batchForm = document.getElementById('batchScheduleForm');
+        const errorDiv = document.getElementById('js-error-message');
+        const errorText = document.getElementById('js-error-text');
+        
+        if (batchForm) {
+            batchForm.addEventListener('submit', function(e) {
+                let hasError = false;
+                let msg = "";
+
+                // A) Verificar si hay días seleccionados
+                const checkedDays = document.querySelectorAll('input[name="hours-days"]:checked');
+                
+                if (checkedDays.length === 0) {
+                    hasError = true;
+                    msg = "Debes seleccionar al menos un día de la semana.";
+                }
+
+                // B) Verificar que Hora Inicio < Hora Fin
+                const startTime = document.getElementById('id_hours-start_time').value;
+                const endTime = document.getElementById('id_hours-end_time').value;
+                
+                if (!hasError && startTime >= endTime) {
+                    hasError = true;
+                    msg = "La hora de término debe ser después del inicio.";
+                }
+
+                if (hasError) {
+                    e.preventDefault(); // Detiene el envío
+                    errorText.textContent = msg;
+                    errorDiv.classList.remove('hidden');
+                    errorDiv.classList.add('animate-pulse');
+                    setTimeout(() => errorDiv.classList.remove('animate-pulse'), 500);
+                } else {
+                    errorDiv.classList.add('hidden');
+                }
+            });
+        }
+
+        // 2. LÓGICA DE FECHAS (TimeOff)
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
         
