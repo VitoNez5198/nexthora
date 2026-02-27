@@ -331,7 +331,7 @@ def booking_confirm_view(request, profile_slug, service_id):
             # 2. Convertirlo a "aware" (con zona horaria actual del proyecto)
             start_datetime = timezone.make_aware(start_datetime_naive)
             
-            # 3. Crear la cita
+            # 3. Crear la citas
             appointment = Appointment.objects.create(
                 professional=profile,
                 service=service,
