@@ -28,7 +28,7 @@ urlpatterns = [
     # Esta es la ruta real para "Mi Horario"
     path('dashboard/schedule/', views.schedule_view, name='schedule'),
     
-    # Ruta para eliminar un horario
+    # Ruta para eliminar un horario xd
     path('dashboard/schedule/delete/<int:schedule_id>/', views.delete_schedule_view, name='delete_schedule'),
 
     # --- GESTIÓN DE CITAS (AGENDA) ---

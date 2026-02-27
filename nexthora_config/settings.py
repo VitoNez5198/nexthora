@@ -4,18 +4,24 @@ Configuración principal de Django para el proyecto Nexthora.
 
 from pathlib import Path
 import os # ¡Importante! Necesitamos 'os' para unir rutas
+from dotenv import load_dotenv # <-- NUEVO: Importamos dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# <-- NUEVO: Le decimos a Django que cargue las variables del archivo .env
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tu-secret-key-aqui' # ¡Cambia esto!
+# <-- MODIFICADO: Ahora lee tu clave secreta desde el .env
+SECRET_KEY = os.getenv('SECRET_KEY') 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# <-- MODIFICADO: Ahora lee el modo Debug desde el .env
+DEBUG = os.getenv('DEBUG') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -78,23 +84,22 @@ WSGI_APPLICATION = 'nexthora_config.wsgi.application'
 # ---
 # CONFIGURACIÓN CLAVE 3: LA BASE DE DATOS (PostgreSQL)
 # ---
-# Así le dices a Django que use PostgreSQL.
-# Necesitarás instalar: pip install psycopg2-binary
+# <-- MODIFICADO: Ahora las contraseñas y usuarios están ocultos y se leen del .env
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'nexthora_db',          # El nombre de tu BBDD en PostgreSQL
-        'USER': 'nexthora_user',       # Tu usuario de PostgreSQL
-        'PASSWORD': 'Trevor1995',
-        'HOST': 'localhost',             # O la dirección de tu BBDD
-        'PORT': '5432',                  # Puerto por defecto de PostgreSQL
+        'NAME': os.getenv('DB_NAME'),          # El nombre de tu BBDD en PostgreSQL
+        'USER': os.getenv('DB_USER'),          # Tu usuario de PostgreSQL
+        'PASSWORD': os.getenv('DB_PASSWORD'),  # Tu contraseña
+        'HOST': 'localhost',                   # O la dirección de tu BBDD
+        'PORT': '5432',                        # Puerto por defecto de PostgreSQL
     }
 }
 
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-AUTH_PASSWORD_VALIDATORS = [
+AUTH_PASSWORD_VALIDATORS = [ 
     # ... (Se quedan los validadores por defecto) ...
 ]
 

@@ -156,7 +156,7 @@ def delete_service_view(request, service_id):
     service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
     if request.method == 'POST':
         service.delete()
-        messages.success(request, "Servicio eliminado.")
+        messages.success(request, "Servicio eliminado .")
     return redirect('services')
 
 # --- GESTIÓN DE HORARIOS (ACTUALIZADO) ---
