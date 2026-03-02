@@ -51,14 +51,16 @@ cd nexthora
 ```
 
 ### 3. Crear y activar un Entorno Virtual
+
 ```bash
 # En Windows:
+
 python -m venv venv
 venv\Scripts\activate
 ```
-
-# En macOS/Linux:
 ```bash
+# En macOS/Linux:
+
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -97,12 +99,14 @@ El proyecto estará disponible en `http://127.0.0.1:8000/`.
 
 ## 📝 Próximos Pasos (Roadmap Comercial)
 
-* [ ] Panel para que el profesional edite el nombre e información de su negocio (Dashboard).
+* [] Panel para que el profesional edite el nombre e información de su negocio (Dashboard).
 
-* [ ] Integración de pasarela de pagos (Stripe / MercadoPago / Webpay) para levantar el límite de servicios.
+* [] Integración de pasarela de pagos (Stripe / MercadoPago / Webpay) para levantar el límite de servicios.
 
-* [ ] Despliegue en servidor de producción (Ej: Railway, Heroku o AWS) con dominio personalizado.
+* [] Despliegue en servidor de producción (Ej: Railway, Heroku o AWS) con dominio personalizado.
 
-* [ ] Envío automático de notificaciones por correo electrónico al confirmar la reserva.
+* [] Envío automático de notificaciones por correo electrónico al confirmar la reserva.
+<br>
+<br>
 
-Desarrollado para simplificar la vida de los profesionales independientes.
+*Desarrollado para simplificar la vida de los profesionales independientes.*
