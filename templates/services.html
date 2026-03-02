@@ -93,7 +93,7 @@
                         <div class="flex items-center gap-4 text-sm text-gray-500 mt-1">
                             <span class="flex items-center gap-1">⏱️ {{ service.duration_minutes }} min</span>
                             <!-- PRECIO SIN DECIMALES -->
-                            <span class="flex items-center gap-1">💲 ${{ service.price|floatformat:0 }}</span>
+                            <span class="flex items-center gap-1">💲 ${{ service.price }}</span>
                         </div>
                         {% if service.description %}
                         <p class="text-gray-400 text-sm mt-2 line-clamp-1">{{ service.description }}</p>

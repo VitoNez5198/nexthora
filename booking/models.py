@@ -116,7 +116,7 @@ class Service(models.Model):
     duration_minutes = models.IntegerField(help_text="Duración total del servicio en minutos. Ej: 45")
     
     # Precio que se muestra en la página (Plan Gratuito)
-    price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Precio a mostrar (ej: 15000.00)", blank=True, null=True)
+    price = models.IntegerField(help_text="Precio a mostrar (ej: 15000)", blank=True, null=True)
 
     is_active = models.BooleanField(default=True, help_text="Marca si el servicio está activo y se puede agendar")
 
