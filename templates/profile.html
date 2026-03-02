@@ -8,12 +8,11 @@
     <!-- TARJETA DEL PERFIL -->
     <div class="text-center mb-8">
         <!-- Avatar Simulado (Inicial) -->
-        <div
-            class="w-24 h-24 bg-gradient-to-br from-primary to-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4">
-            {{ profile.display_name|slice:":1" }}
+        <div class="w-24 h-24 bg-gradient-to-br from-primary to-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-4xl font-bold shadow-lg mb-4">
+            {{ profile.display_name|default:profile.user.username|slice:":1"|upper }}
         </div>
 
-        <h1 class="text-2xl font-bold text-gray-900">{{ profile.display_name }}</h1>
+        <h1 class="text-2xl font-bold text-gray-900">{{ profile.display_name|default:profile.user.username }}</h1>
 
         {% if profile.bio %}
         <p class="text-gray-600 mt-2 px-4">{{ profile.bio }}</p>

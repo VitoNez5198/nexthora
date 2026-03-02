@@ -14,7 +14,7 @@
         <h1 class="text-2xl font-bold text-gray-900 mb-2">¡Reserva Exitosa!</h1>
         <p class="text-gray-600 mb-8 text-sm">
             Tu cita ha sido agendada correctamente. <br>
-            Hemos notificado a <span class="font-bold">{{ profile.display_name }}</span>.
+            Hemos notificado a <span class="font-bold">{{ profile.display_name|default:profile.user.username }}</span>.
         </p>
 
         <!-- CAJA DE DETALLES -->
@@ -25,7 +25,7 @@
             <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Resumen de tu cita</h3>
             
             <p class="font-bold text-gray-900 text-lg leading-tight mb-1">{{ service.name }}</p>
-            <p class="text-sm text-gray-500 mb-4">con {{ profile.display_name }}</p>
+            <p class="text-sm text-gray-500 mb-4">con {{ profile.display_name|default:profile.user.username }}</p>
 
             <div class="flex items-center gap-3 pt-3 border-t border-gray-200">
                 <div class="bg-white p-2 rounded border border-gray-200 text-center min-w-[50px]">
@@ -42,7 +42,7 @@
         <!-- BOTÓN ÚNICO DE SALIDA -->
         <!-- Redirige al perfil público, que actúa como la "Bio" o "Home" del cliente -->
         <a href="{% url 'public_profile' profile.slug %}" class="block w-full bg-gray-900 text-white px-6 py-3.5 rounded-lg font-bold hover:bg-black transition shadow-md flex items-center justify-center gap-2">
-            <span>←</span> Volver al Perfil de {{ profile.display_name|truncatechars:15 }}
+            <span>←</span> Volver al Perfil de {{ profile.display_name|default:profile.user.username|truncatechars:15 }}
         </a>
         
         <p class="text-xs text-gray-400 mt-4">

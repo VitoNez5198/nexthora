@@ -17,7 +17,7 @@
     {% endif %}
 
     <h1 class="text-2xl font-bold text-center mb-2 text-dark-gray">Completa tus datos</h1>
-    <p class="text-center text-gray-500 mb-8">Para confirmar tu cita con {{ profile.display_name }}</p>
+    <p class="text-center text-gray-500 mb-8">Para confirmar tu cita con {{ profile.display_name|default:profile.user.username }}</p>
 
     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
 
