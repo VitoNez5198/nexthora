@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Configuración de Perfil - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-10 px-4 w-full">
+    
+    <!-- Encabezado -->
+    <div class="mb-10 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2 font-display">Completa tu perfil</h2>
+        <p class="text-gray-500">Cuéntale a tus clientes un poco más sobre ti y tu negocio.</p>
+    </div>
+
+    <form method="POST" class="space-y-8">
+        {% csrf_token %}
+
+        <!-- Sección 1: Identidad Visual -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-8">
+                <!-- Avatar Visual (Placeholder) -->
+                <div class="flex flex-col items-center mb-10">
+                    <div class="relative group">
+                        <div class="w-28 h-28 rounded-full overflow-hidden ring-4 ring-gray-50 bg-blue-50 flex items-center justify-center border border-blue-100">
+                            <span class="text-4xl font-bold text-blue-600">{{ user.username|slice:":1"|upper }}</span>
+                        </div>
+                        <button type="button" class="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-lg hover:scale-105 transition-transform" title="Cambiar foto (Próximamente)">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        </button>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <h3 class="font-bold text-gray-900">Foto de Perfil</h3>
+                        <p class="text-xs text-gray-500 mt-1">Soporte para imágenes en la versión Pro.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.display_name.label }}</label>
+                        {{ form.display_name }}
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.slug.label }}</label>
+                        <div class="flex items-center">
+                            <span class="px-4 py-3.5 bg-gray-50 border border-r-0 border-gray-200 rounded-l-xl text-gray-500 text-sm font-medium">nexthora.com/</span>
+                            {{ form.slug }}
+                        </div>
+                        <p class="text-[11px] text-gray-400 mt-1">Este será tu enlace único para recibir reservas.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 2: Biografía -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                Biografía Profesional
+            </h3>
+            <div class="space-y-6">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.bio.label }}</label>
+                    {{ form.bio }}
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección 3: Presencia Online (NUEVA) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                Redes Sociales y Web
+            </h3>
+            <div class="space-y-4">
+                
+                <!-- Instagram -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.instagram_url.label }}</label>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-l-xl bg-gray-50 border border-r-0 border-gray-200 flex items-center justify-center text-gray-400">
+                            <!-- Icono Instagram -->
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.20 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+                        </div>
+                        {{ form.instagram_url }}
+                    </div>
+                </div>
+
+                <!-- Website -->
+                <div class="space-y-1.5 mt-4">
+                    <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.website_url.label }}</label>
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 rounded-l-xl bg-gray-50 border border-r-0 border-gray-200 flex items-center justify-center text-gray-400">
+                            <!-- Icono Web -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                        </div>
+                        {{ form.website_url }}
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Barra de Acción -->
+        <div class="flex items-center justify-between pt-4 pb-10">
+            <a href="{% url 'dashboard' %}" class="px-4 py-3 text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors">
+                Descartar cambios
+            </a>
+            <button type="submit" class="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 hover:shadow-blue-600/30 hover:-translate-y-0.5 transition-all active:scale-95">
+                Guardar y Continuar
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

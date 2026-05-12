@@ -9,12 +9,10 @@ from datetime import datetime, timedelta, date, time
 from django.contrib.auth.forms import AuthenticationForm
 
 # Importación de Formularios y Modelos locales
-from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm
+from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
-
-
-# ... (Tus vistas index, register, login, dashboard SE QUEDAN IGUAL) ...
+# ... (Vistas de Auth se mantienen) ...
 def index_view(request):
     if request.user.is_authenticated: 
         return redirect('dashboard')
@@ -31,11 +29,7 @@ def register_view(request):
         form = NexthoraUserCreationForm()
     return render(request, 'register.html', {'form': form})
 
-# --- VISTA DE LOGIN ---
 def login_view(request):
-    """
-    Maneja el inicio de sesión de los profesionales.
-    """
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -54,35 +48,31 @@ def login_view(request):
 
     return render(request, 'login.html', {'form': form})
 
+# --- VISTA DE CONFIGURACIÓN DE PERFIL (NUEVA) ---
+@login_required
+def profile_setup_view(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        form = ProfessionalProfileForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "¡Tu perfil ha sido actualizado con éxito!")
+            return redirect('profile_setup')
+    else:
+        form = ProfessionalProfileForm(instance=profile)
+    
+    return render(request, 'profile_setup.html', {'form': form})
+
+
 @login_required
 def dashboard_view(request):
     profile = request.user.profile
-    
-    # Obtener fecha y hora actual en la zona horaria correcta
     now = timezone.localtime(timezone.now())
     today = now.date()
     tomorrow = today + timedelta(days=1)
 
-    # 1. Citas de HOY (Ordenadas por hora)
-    today_appointments = Appointment.objects.filter(
-        professional=profile,
-        start_datetime__date=today,
-        status='CONFIRMED'
-    ).order_by('start_datetime')
-
-    # 2. Citas de MAÑANA
-    tomorrow_appointments = Appointment.objects.filter(
-        professional=profile,
-        start_datetime__date=tomorrow,
-        status='CONFIRMED'
-    ).order_by('start_datetime')
-
-    # (Opcional) Próximas citas después de mañana
-    future_appointments = Appointment.objects.filter(
-        professional=profile,
-        start_datetime__date__gt=tomorrow,
-        status='CONFIRMED'
-    ).order_by('start_datetime')[:5]
+    today_appointments = Appointment.objects.filter(professional=profile, start_datetime__date=today, status='CONFIRMED').order_by('start_datetime')
+    tomorrow_appointments = Appointment.objects.filter(professional=profile, start_datetime__date=tomorrow, status='CONFIRMED').order_by('start_datetime')
 
     return render(request, 'dashboard.html', {
         'today_appointments': today_appointments,
@@ -91,7 +81,6 @@ def dashboard_view(request):
         'tomorrow_date': tomorrow
     })
 
-# --- GESTIÓN DE SERVICIOS (AQUÍ ESTÁ LA LÓGICA DEL LÍMITE) ---
 @login_required
 def services_view(request):
     try:
@@ -101,10 +90,9 @@ def services_view(request):
 
     services = Service.objects.filter(professional=profile).order_by('name')
     services_count = services.count()
-    SERVICE_LIMIT = 2  # <--- ¡AQUÍ ESTÁ EL LÍMITE! CÁMBIALO A 10 SI QUIERES PROBAR MÁS
+    SERVICE_LIMIT = 2
 
     if request.method == 'POST':
-        # Si ya alcanzó el límite, mostramos error y NO guardamos
         if services_count >= SERVICE_LIMIT:
             messages.error(request, f"Límite alcanzado ({SERVICE_LIMIT}). Elimina un servicio para crear otro.")
             return redirect('services')
@@ -121,14 +109,8 @@ def services_view(request):
     else:
         form = ServiceForm()
 
-    return render(request, 'services.html', {
-        'form': form,
-        'services': services,
-        'services_count': services_count,
-        'service_limit': SERVICE_LIMIT
-    })
+    return render(request, 'services.html', {'form': form, 'services': services, 'services_count': services_count, 'service_limit': SERVICE_LIMIT})
 
-# ... (MANTÉN EL RESTO DE TUS VISTAS IGUAL: edit, toggle, delete, schedule...) ...
 @login_required
 def edit_service_view(request, service_id):
     service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
@@ -156,10 +138,9 @@ def delete_service_view(request, service_id):
     service = get_object_or_404(Service, id=service_id, professional=request.user.profile)
     if request.method == 'POST':
         service.delete()
-        messages.success(request, "Servicio eliminado .")
+        messages.success(request, "Servicio eliminado.")
     return redirect('services')
 
-# --- GESTIÓN DE HORARIOS (ACTUALIZADO) ---
 @login_required
 def schedule_view(request):
     try:
@@ -167,45 +148,27 @@ def schedule_view(request):
     except:
         return redirect('dashboard')
 
-    # Instanciamos ambos formularios
     hours_form = BatchScheduleForm(prefix='hours')
     timeoff_form = TimeOffForm(prefix='off')
 
     if request.method == 'POST':
-        # --- PROCESAR HORARIO SEMANAL ---
         if 'submit_hours' in request.POST:
             hours_form = BatchScheduleForm(request.POST, prefix='hours')
             if hours_form.is_valid():
-                selected_days = hours_form.cleaned_data['days'] # Lista ['0', '1', '2'...]
+                selected_days = hours_form.cleaned_data['days']
                 start = hours_form.cleaned_data['start_time']
                 end = hours_form.cleaned_data['end_time']
-                
                 count = 0
                 for day_code in selected_days:
-                    # 1. BORRAR PREVIOS: Eliminamos cualquier horario existente para este día
-                    # Esto garantiza que solo haya UN horario por día (Lógica MVP)
-                    BusinessHours.objects.filter(
-                        professional=profile, 
-                        weekday=int(day_code)
-                    ).delete()
-                    
-                    # 2. CREAR NUEVO:
-                    BusinessHours.objects.create(
-                        professional=profile,
-                        weekday=int(day_code),
-                        start_time=start,
-                        end_time=end
-                    )
+                    BusinessHours.objects.filter(professional=profile, weekday=int(day_code)).delete()
+                    BusinessHours.objects.create(professional=profile, weekday=int(day_code), start_time=start, end_time=end)
                     count += 1
-                
                 if count > 0:
                     messages.success(request, f"Horario actualizado para {count} días.")
                 else:
                     messages.warning(request, "No seleccionaste ningún día.")
-                
                 return redirect('schedule')
         
-        # --- PROCESAR DÍAS BLOQUEADOS ---
         elif 'submit_off' in request.POST:
             timeoff_form = TimeOffForm(request.POST, prefix='off')
             if timeoff_form.is_valid():
@@ -215,16 +178,10 @@ def schedule_view(request):
                 messages.success(request, "Días bloqueados correctamente.")
                 return redirect('schedule')
 
-    # Obtener datos para mostrar
     schedule = BusinessHours.objects.filter(professional=profile).order_by('weekday', 'start_time')
     time_off_list = TimeOff.objects.filter(professional=profile).order_by('start_date')
 
-    return render(request, 'schedule.html', {
-        'hours_form': hours_form,
-        'timeoff_form': timeoff_form,
-        'schedule': schedule,
-        'time_off_list': time_off_list
-    })
+    return render(request, 'schedule.html', {'hours_form': hours_form, 'timeoff_form': timeoff_form, 'schedule': schedule, 'time_off_list': time_off_list})
 
 @login_required
 def delete_schedule_view(request, schedule_id):
@@ -242,7 +199,6 @@ def delete_timeoff_view(request, timeoff_id):
         messages.success(request, "Bloqueo eliminado.")
     return redirect('schedule')
 
-# ... (El resto de vistas appointments_view, profile_view, booking_view... SE QUEDAN IGUAL) ...
 @login_required
 def appointments_view(request):
     try:
@@ -320,43 +276,21 @@ def booking_confirm_view(request, profile_slug, service_id):
         
         if not all([client_name, client_last_name, client_rut, client_email, client_whatsapp]):
              messages.error(request, "Por favor completa todos los campos.")
-             return render(request, 'booking_confirm.html', {
-                'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str
-            })
+             return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
 
         try:
-            # 1. Crear datetime "naive" (sin zona horaria)
             start_datetime_naive = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
-            
-            # 2. Convertirlo a "aware" (con zona horaria actual del proyecto)
             start_datetime = timezone.make_aware(start_datetime_naive)
             
-            # 3. Crear la citas
             appointment = Appointment.objects.create(
-                professional=profile,
-                service=service,
-                client_name=client_name,
-                client_last_name=client_last_name,
-                client_rut=client_rut,
-                client_email=client_email,
-                client_whatsapp=client_whatsapp,
+                professional=profile, service=service, client_name=client_name,
+                client_last_name=client_last_name, client_rut=client_rut,
+                client_email=client_email, client_whatsapp=client_whatsapp,
                 start_datetime=start_datetime
             )
-            
-            return render(request, 'success.html', {
-                'service': service, 
-                'appointment': appointment,
-                'profile': profile
-            })
+            return render(request, 'success.html', {'service': service, 'appointment': appointment, 'profile': profile})
             
         except Exception as e:
-            # Imprimimos el error en la consola para verlo claro si falla
-            print(f"ERROR AL AGENDAR: {e}")
             messages.error(request, f"Error al agendar. Inténtalo de nuevo. ({e})")
 
-    return render(request, 'booking_confirm.html', {
-        'profile': profile,
-        'service': service,
-        'date_str': date_str,
-        'time_str': time_str
-    })
+    return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
