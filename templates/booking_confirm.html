@@ -5,84 +5,81 @@
 {% block content %}
 <div class="max-w-md mx-auto py-10">
 
-    <!-- Mensajes de Error Globales (del Backend) -->
-    {% if messages %}
-    <div class="mb-6">
-        {% for message in messages %}
-        <div class="p-4 rounded-lg bg-red-100 text-red-700 text-sm border border-red-200">
-            {{ message }}
-        </div>
-        {% endfor %}
+    <div class="text-center mb-8">
+        <h1 class="text-2xl font-bold text-gray-900">Completa tus datos</h1>
+        <p class="text-gray-500 mt-2">Para confirmar tu cita con <span class="font-medium text-gray-900">{{ profile.display_name|default:profile.user.username }}</span></p>
     </div>
-    {% endif %}
 
-    <h1 class="text-2xl font-bold text-center mb-2 text-dark-gray">Completa tus datos</h1>
-    <p class="text-center text-gray-500 mb-8">Para confirmar tu cita con {{ profile.display_name|default:profile.user.username }}</p>
-
-    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
 
         <!-- Resumen -->
-        <div class="mb-6 pb-6 border-b border-gray-100 bg-blue-50 -mx-6 -mt-6 px-6 py-4 rounded-t-xl">
-            <p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-1">Estás reservando</p>
+        <div class="bg-gray-50 border-b border-gray-200 p-6">
+            <p class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Estás reservando
+            </p>
             <p class="font-bold text-gray-900 text-lg">{{ service.name }}</p>
-            <div class="flex gap-4 mt-2 text-sm text-gray-700">
-                <span class="flex items-center gap-1">📅 {{ date_str }}</span>
-                <span class="flex items-center gap-1">⏰ {{ time_str }}</span>
+            <div class="flex gap-4 mt-3 text-sm text-gray-700 font-medium">
+                <span class="flex items-center gap-1.5 bg-white border border-gray-200 px-2 py-1 rounded-md">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    {{ date_str }}
+                </span>
+                <span class="flex items-center gap-1.5 bg-white border border-gray-200 px-2 py-1 rounded-md">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ time_str }}
+                </span>
             </div>
         </div>
 
         <!-- Formulario -->
-        <!-- IMPORTANTE: action="" envía al mismo URL, manteniendo los parámetros GET (?date=...&time=...) -->
-        <form method="POST" class="space-y-4">
+        <form method="POST" class="p-6 space-y-5">
             {% csrf_token %}
 
-            <!-- Fila 1: Nombre y Apellido -->
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Nombre</label>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">Nombre</label>
                     <input type="text" name="client_name" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Apellido</label>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">Apellido</label>
                     <input type="text" name="client_last_name" required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
                 </div>
             </div>
 
-            <!-- Fila 2: RUT -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">RUT</label>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">RUT</label>
                 <input type="text" name="client_rut" placeholder="12.345.678-9" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
             </div>
 
-            <!-- Fila 3: Email -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Email</label>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">Email</label>
                 <input type="email" name="client_email" required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary">
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
             </div>
 
-            <!-- Fila 4: WhatsApp (+569 fijo) -->
             <div>
-                <label class="block text-xs font-bold text-gray-500 uppercase mb-1">WhatsApp</label>
-                <div class="relative">
-                    <span class="absolute left-3 top-2 text-gray-500 font-medium border-r border-gray-300 pr-2">
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1.5">WhatsApp</label>
+                <div class="relative flex items-center border border-gray-300 rounded-md focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all bg-white overflow-hidden">
+                    <span class="pl-3 pr-2 py-2 text-gray-500 font-medium bg-gray-50 border-r border-gray-200">
                         +569
                     </span>
-                    <!-- Pattern para validar solo 8 dígitos -->
                     <input type="tel" name="client_whatsapp" placeholder="1234 5678" required maxlength="8"
                         pattern="[0-9]{8}" title="Ingresa solo los 8 dígitos de tu número"
-                        class="w-full pl-20 px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary font-medium tracking-wide">
+                        class="w-full px-3 py-2 outline-none font-medium tracking-wide">
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Ingresa los 8 números restantes.</p>
+                <p class="text-xs text-gray-500 mt-1.5">Ingresa los 8 números restantes.</p>
             </div>
 
             <button type="submit"
-                class="w-full mt-6 bg-green-600 text-white py-3 rounded-lg font-bold hover:bg-green-700 transition shadow-md">
+                class="w-full mt-2 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all font-bold shadow-sm active:scale-95 text-base">
                 Confirmar Reserva
             </button>
+            <a href="javascript:history.back()" class="block text-center w-full mt-3 bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all font-medium text-sm">
+                Cancelar y Volver
+            </a>
         </form>
     </div>
 </div>

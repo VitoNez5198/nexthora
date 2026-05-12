@@ -6,55 +6,63 @@
 <div class="max-w-md mx-auto py-10 px-4">
 
     <!-- Botón Volver -->
-    <a href="{% url 'public_profile' profile.slug %}" class="text-sm text-gray-500 mb-4 block hover:text-primary flex items-center gap-1">
-        <span>←</span> Volver al perfil
+    <a href="{% url 'public_profile' profile.slug %}" class="text-sm text-gray-500 mb-6 block hover:text-blue-600 font-medium transition-colors flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Volver al perfil
     </a>
 
     <!-- Tarjeta Resumen del Servicio -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
         <h1 class="text-xl font-bold text-gray-900 leading-tight">{{ service.name }}</h1>
         
         <!-- CORRECCIÓN DE FRASE -->
         <div class="mt-2 text-sm flex items-center gap-2 text-gray-600">
-            <span class="bg-gray-100 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide text-gray-500">Profesional</span>
+            <span class="bg-gray-50 border border-gray-200 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wide text-gray-500">Profesional</span>
             <span class="font-medium text-gray-900">{{ profile.display_name|default:profile.user.username }}</span>
         </div>
 
-        <div class="mt-4 flex gap-3 text-sm">
-            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-md font-medium border border-blue-100 flex items-center gap-1">
-                ⏱️ {{ service.duration_minutes }} min
+        <div class="mt-5 flex gap-3 text-sm">
+            <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg font-medium border border-blue-200 flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                {{ service.duration_minutes }} min
             </span>
-            <span class="bg-green-50 text-green-700 px-3 py-1 rounded-md font-medium border border-green-100 flex items-center gap-1">
-                💲 ${{ service.price|default:"0" }}
+            <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg font-medium border border-green-200 flex items-center gap-1.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                ${{ service.price|default:"0" }}
             </span>
         </div>
     </div>
 
     <!-- SELECTOR DE FECHA -->
-    <form method="GET" class="mb-8">
-        <label class="block text-sm font-bold text-gray-700 mb-2">Selecciona una fecha:</label>
+    <form method="GET" class="mb-8 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+        <label class="block text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            Selecciona una fecha:
+        </label>
         <input type="date" name="date" value="{{ selected_date|date:'Y-m-d' }}" onchange="this.form.submit()"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary shadow-sm outline-none transition cursor-pointer">
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer font-medium text-gray-900 bg-gray-50">
     </form>
 
     <!-- LISTA DE HORAS DISPONIBLES -->
     <div>
-        <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Horas disponibles</h2>
+        <h2 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Horas disponibles
+        </h2>
 
         {% if available_slots %}
         <div class="grid grid-cols-3 gap-3">
             {% for slot in available_slots %}
             <a href="{% url 'booking_step2' profile.slug service.id %}?date={{ selected_date|date:'Y-m-d' }}&time={{ slot|time:'H:i' }}"
-                class="block text-center py-3 bg-white border border-gray-200 text-primary rounded-lg hover:bg-primary hover:text-white hover:border-primary transition font-bold shadow-sm active:scale-95">
+                class="block text-center py-3 bg-white border border-gray-200 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-all font-bold shadow-sm active:scale-95">
                 {{ slot|time:"H:i" }}
             </a>
             {% endfor %}
         </div>
         {% else %}
-        <!-- Mensaje si no hay horas -->
-        <div class="text-center p-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-            <p class="text-gray-500 font-medium">No hay horas disponibles</p>
-            <p class="text-sm text-gray-400 mt-1">Intenta seleccionando otra fecha arriba.</p>
+        <div class="text-center p-8 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+            <p class="text-gray-900 font-medium">No hay horas disponibles</p>
+            <p class="text-sm text-gray-500 mt-1">Intenta seleccionando otra fecha arriba.</p>
         </div>
         {% endif %}
     </div>

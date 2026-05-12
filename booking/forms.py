@@ -4,6 +4,11 @@ from django.contrib.auth.models import User
 from .models import Service, BusinessHours, TimeOff
 import datetime
 
+# --- SNIPPETS DE DISEÑO ---
+INPUT_CLASSES = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all'
+CHECKBOX_CLASSES = 'h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none transition-all'
+SELECT_CLASSES = 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white text-center font-mono cursor-pointer'
+
 # --- FORMULARIO DE REGISTRO ---
 class NexthoraUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text="Requerido. Ingresa un email válido.")
@@ -25,11 +30,11 @@ class ServiceForm(forms.ModelForm):
         model = Service
         fields = ['name', 'description', 'duration_minutes', 'price', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary'}),
-            'description': forms.Textarea(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary', 'rows': 3}),
-            'duration_minutes': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary'}),
-            'price': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary'}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary'}),
+            'name': forms.TextInput(attrs={'class': INPUT_CLASSES}),
+            'description': forms.Textarea(attrs={'class': INPUT_CLASSES, 'rows': 3}),
+            'duration_minutes': forms.NumberInput(attrs={'class': INPUT_CLASSES}),
+            'price': forms.NumberInput(attrs={'class': INPUT_CLASSES}),
+            'is_active': forms.CheckboxInput(attrs={'class': CHECKBOX_CLASSES}),
         }
         labels = {
             'name': 'Nombre del Servicio',
@@ -55,12 +60,12 @@ class BatchScheduleForm(forms.Form):
     )
     start_time = forms.ChoiceField(
         choices=TIME_CHOICES,
-        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary bg-white text-center font-mono cursor-pointer'}),
+        widget=forms.Select(attrs={'class': SELECT_CLASSES}),
         label="Desde", initial="09:00"
     )
     end_time = forms.ChoiceField(
         choices=TIME_CHOICES,
-        widget=forms.Select(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary bg-white text-center font-mono cursor-pointer'}),
+        widget=forms.Select(attrs={'class': SELECT_CLASSES}),
         label="Hasta", initial="18:00"
     )
 
@@ -83,9 +88,9 @@ class TimeOffForm(forms.ModelForm):
         model = TimeOff
         fields = ['start_date', 'end_date', 'description']
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary'}),
-            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary'}),
-            'description': forms.TextInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary', 'placeholder': 'Ej: Vacaciones'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': INPUT_CLASSES}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': INPUT_CLASSES}),
+            'description': forms.TextInput(attrs={'class': INPUT_CLASSES, 'placeholder': 'Ej: Vacaciones'}),
         }
         labels = { 'start_date': 'Desde', 'end_date': 'Hasta', 'description': 'Motivo' }
     
