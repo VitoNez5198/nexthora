@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Ajustes de Cuenta - Nexthora{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto py-10 px-4 w-full">
+    
+    <!-- Encabezado -->
+    <div class="mb-10 text-center">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2 font-display">Ajustes de Cuenta</h2>
+        <p class="text-gray-500">Gestiona tus credenciales de acceso y seguridad.</p>
+    </div>
+
+    <div class="space-y-8">
+        
+        <!-- SECCIÓN 1: DATOS BÁSICOS -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-8">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    Datos de Acceso
+                </h3>
+                
+                <form method="POST" action="{% url 'account_settings' %}">
+                    {% csrf_token %}
+                    <div class="grid grid-cols-1 gap-6 mb-6">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ account_form.username.label }}</label>
+                            {{ account_form.username }}
+                            {% for error in account_form.username.errors %}<p class="text-xs text-red-600 font-bold mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ account_form.email.label }}</label>
+                            {{ account_form.email }}
+                            <p class="text-[11px] text-gray-400 mt-1">Este correo se usa para iniciar sesión y recuperar tu contraseña.</p>
+                            {% for error in account_form.email.errors %}<p class="text-xs text-red-600 font-bold mt-1">{{ error }}</p>{% endfor %}
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="submit" name="update_account" class="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-sm hover:bg-gray-800 transition-colors">
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: SEGURIDAD (CONTRASEÑA) -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden border-t-4 border-t-gray-800">
+            <div class="p-8">
+                <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                    Cambiar Contraseña
+                </h3>
+                
+                <form method="POST" action="{% url 'account_settings' %}">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-5 mb-6">
+                        {% for field in password_form %}
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ field.label }}</label>
+                            
+                            <!-- Inyectamos clases de Tailwind directamente al input de Django usando HTML nativo -->
+                            <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-gray-800/20 focus:border-gray-800 outline-none transition-all" required>
+                            
+                            {% if field.help_text %}
+                            <p class="text-[11px] text-gray-400 mt-1">{{ field.help_text|safe }}</p>
+                            {% endif %}
+                            
+                            {% for error in field.errors %}
+                            <p class="text-xs text-red-600 font-bold mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" name="update_password" class="px-6 py-2.5 bg-gray-900 text-white font-bold rounded-xl shadow-sm hover:bg-gray-800 transition-colors">
+                            Actualizar Contraseña
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+    </div>
+</div>
+{% endblock %}

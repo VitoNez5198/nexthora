@@ -12,7 +12,8 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 
     path('dashboard/profile/', views.profile_setup_view, name='profile_setup'),
-    path('dashboard/profile/toggle/', views.toggle_profile_visibility, name='toggle_profile_visibility'), # NUEVA
+    path('dashboard/profile/toggle/', views.toggle_profile_visibility, name='toggle_profile_visibility'),
+    path('dashboard/settings/', views.account_settings_view, name='account_settings'), 
 
     path('dashboard/services/', views.services_view, name='services'), 
     path('dashboard/services/edit/<int:service_id>/', views.edit_service_view, name='edit_service'),
@@ -28,6 +29,9 @@ urlpatterns = [
     
     path('<slug:profile_slug>/book/<int:service_id>/', views.booking_view, name='booking_step1'),
     path('<slug:profile_slug>/book/<int:service_id>/confirm/', views.booking_confirm_view, name='booking_step2'),
+    
+    # --- NUEVA RUTA PARA EL ÉXITO ---
+    path('<slug:profile_slug>/book/success/<int:appointment_id>/', views.booking_success_view, name='booking_success'),
     
     path('<slug:profile_slug>/', views.profile_view, name='public_profile'),
 ]

@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
-from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm
+from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm, AccountSettingsForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
 def index_view(request):
@@ -67,10 +67,38 @@ def toggle_profile_visibility(request):
     return JsonResponse({'success': False}, status=400)
 
 @login_required
+def account_settings_view(request):
+    if request.method == 'POST':
+        if 'update_account' in request.POST:
+            account_form = AccountSettingsForm(request.POST, instance=request.user)
+            password_form = PasswordChangeForm(user=request.user)
+            if account_form.is_valid():
+                account_form.save()
+                messages.success(request, "Datos de cuenta actualizados correctamente.")
+                return redirect('account_settings')
+        
+        elif 'update_password' in request.POST:
+            account_form = AccountSettingsForm(instance=request.user)
+            password_form = PasswordChangeForm(user=request.user, data=request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user) 
+                messages.success(request, "¡Tu contraseña ha sido actualizada!")
+                return redirect('account_settings')
+    else:
+        account_form = AccountSettingsForm(instance=request.user)
+        password_form = PasswordChangeForm(user=request.user)
+
+    return render(request, 'settings.html', {
+        'account_form': account_form,
+        'password_form': password_form
+    })
+
+@login_required
 def dashboard_view(request):
     profile = request.user.profile
-    now = timezone.localtime(timezone.now())
-    today = now.date()
+    now = timezone.now()
+    today = timezone.localtime(now).date()
     tomorrow = today + timedelta(days=1)
 
     today_appointments = Appointment.objects.filter(
@@ -81,13 +109,14 @@ def dashboard_view(request):
         professional=profile, start_datetime__date=tomorrow, status__in=['PENDING', 'CONFIRMED']
     ).order_by('start_datetime')
 
-    # NUEVO: Lógica exacta para encontrar la PRÓXIMA cita de hoy que aún no ha pasado
     next_appointment = today_appointments.filter(start_datetime__gte=now).first()
+    pending_count = Appointment.objects.filter(professional=profile, status='PENDING').count()
 
     return render(request, 'dashboard.html', {
         'today_appointments': today_appointments,
         'tomorrow_appointments': tomorrow_appointments,
         'next_appointment': next_appointment,
+        'pending_count': pending_count,
         'today_date': today,
         'tomorrow_date': tomorrow,
         'profile': profile
@@ -95,11 +124,7 @@ def dashboard_view(request):
 
 @login_required
 def services_view(request):
-    try:
-        profile = request.user.profile
-    except ProfessionalProfile.DoesNotExist:
-        return redirect('dashboard')
-
+    profile = request.user.profile
     services = Service.objects.filter(professional=profile).order_by('name')
     services_count = services.count()
     SERVICE_LIMIT = 2
@@ -155,11 +180,7 @@ def delete_service_view(request, service_id):
 
 @login_required
 def schedule_view(request):
-    try:
-        profile = request.user.profile
-    except:
-        return redirect('dashboard')
-
+    profile = request.user.profile
     hours_form = BatchScheduleForm(prefix='hours')
     timeoff_form = TimeOffForm(prefix='off')
 
@@ -175,10 +196,7 @@ def schedule_view(request):
                     BusinessHours.objects.filter(professional=profile, weekday=int(day_code)).delete()
                     BusinessHours.objects.create(professional=profile, weekday=int(day_code), start_time=start, end_time=end)
                     count += 1
-                if count > 0:
-                    messages.success(request, f"Horario actualizado para {count} días.")
-                else:
-                    messages.warning(request, "No seleccionaste ningún día.")
+                messages.success(request, f"Horario actualizado para {count} días.")
                 return redirect('schedule')
         
         elif 'submit_off' in request.POST:
@@ -192,7 +210,6 @@ def schedule_view(request):
 
     schedule = BusinessHours.objects.filter(professional=profile).order_by('weekday', 'start_time')
     time_off_list = TimeOff.objects.filter(professional=profile).order_by('start_date')
-
     return render(request, 'schedule.html', {'hours_form': hours_form, 'timeoff_form': timeoff_form, 'schedule': schedule, 'time_off_list': time_off_list})
 
 @login_required
@@ -213,20 +230,23 @@ def delete_timeoff_view(request, timeoff_id):
 
 @login_required
 def appointments_view(request):
-    try:
-        profile = request.user.profile
-    except:
-        return redirect('dashboard')
+    profile = request.user.profile
+    now = timezone.now()
     
-    upcoming_appointments = Appointment.objects.filter(
-        professional=profile, start_datetime__gte=timezone.now(), status__in=['PENDING', 'CONFIRMED']
-    ).order_by('start_datetime')
+    pending_appointments = Appointment.objects.filter(professional=profile, start_datetime__gte=now, status='PENDING').order_by('start_datetime')
+    upcoming_appointments = Appointment.objects.filter(professional=profile, start_datetime__gte=now, status='CONFIRMED').order_by('start_datetime')
+    past_appointments = Appointment.objects.filter(professional=profile, start_datetime__lt=now, status__in=['CONFIRMED', 'COMPLETED']).order_by('-start_datetime')
+    cancelled_appointments = Appointment.objects.filter(professional=profile, status__in=['CANCELLED_BY_PRO', 'CANCELLED_BY_CLIENT']).order_by('-start_datetime')
     
-    past_appointments = Appointment.objects.filter(
-        professional=profile, start_datetime__lt=timezone.now()
-    ).exclude(status='PENDING').order_by('-start_datetime')
-    
-    return render(request, 'appointments.html', {'upcoming_appointments': upcoming_appointments, 'past_appointments': past_appointments})
+    pending_count = pending_appointments.count()
+
+    return render(request, 'appointments.html', {
+        'pending_appointments': pending_appointments,
+        'upcoming_appointments': upcoming_appointments,
+        'past_appointments': past_appointments,
+        'cancelled_appointments': cancelled_appointments,
+        'pending_count': pending_count
+    })
 
 @login_required
 def update_appointment_status(request, appt_id, new_status):
@@ -237,9 +257,12 @@ def update_appointment_status(request, appt_id, new_status):
         if new_status in valid_statuses:
             appt.status = new_status
             appt.save()
-            return JsonResponse({'success': True, 'status': new_status})
             
-    return JsonResponse({'success': False}, status=400)
+            if new_status == 'CONFIRMED': messages.success(request, f"¡Cita con {appt.client_name} confirmada!")
+            elif new_status == 'CANCELLED_BY_PRO': messages.warning(request, f"Cita con {appt.client_name} rechazada/cancelada.")
+            
+    referer = request.META.get('HTTP_REFERER', 'dashboard')
+    return redirect(referer)
 
 
 def get_available_slots(profile, service, check_date):
@@ -252,9 +275,7 @@ def get_available_slots(profile, service, check_date):
     except BusinessHours.DoesNotExist:
         return []
 
-    existing_appointments = Appointment.objects.filter(
-        professional=profile, start_datetime__date=check_date, status__in=['PENDING', 'CONFIRMED']
-    )
+    existing_appointments = Appointment.objects.filter(professional=profile, start_datetime__date=check_date, status__in=['PENDING', 'CONFIRMED'])
     
     slots = []
     current_time = datetime.combine(check_date, work_hours.start_time)
@@ -287,23 +308,19 @@ def profile_view(request, profile_slug):
 
 def booking_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
-    if not profile.is_active:
-        return redirect('public_profile', profile_slug=profile.slug)
+    if not profile.is_active: return redirect('public_profile', profile_slug=profile.slug)
+    
     service = get_object_or_404(Service, id=service_id, professional=profile)
     date_str = request.GET.get('date')
-    if date_str:
-        selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    else:
-        selected_date = date.today()
+    selected_date = datetime.strptime(date_str, '%Y-%m-%d').date() if date_str else date.today()
     available_slots = get_available_slots(profile, service, selected_date)
     return render(request, 'booking.html', {'profile': profile, 'service': service, 'selected_date': selected_date, 'available_slots': available_slots})
 
 def booking_confirm_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
-    if not profile.is_active:
-        return redirect('public_profile', profile_slug=profile.slug)
+    if not profile.is_active: return redirect('public_profile', profile_slug=profile.slug)
+        
     service = get_object_or_404(Service, id=service_id, professional=profile)
-    
     date_str = request.GET.get('date')
     time_str = request.GET.get('time')
     
@@ -313,24 +330,34 @@ def booking_confirm_view(request, profile_slug, service_id):
         client_rut = request.POST.get('client_rut')
         client_email = request.POST.get('client_email')
         client_whatsapp = request.POST.get('client_whatsapp')
-        
-        if not all([client_name, client_last_name, client_rut, client_email, client_whatsapp]):
-            messages.error(request, "Por favor completa todos los campos.")
-            return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
 
         try:
             start_datetime_naive = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
             start_datetime = timezone.make_aware(start_datetime_naive)
             
+            # 1. Crea la cita en la base de datos
             appointment = Appointment.objects.create(
                 professional=profile, service=service, client_name=client_name,
                 client_last_name=client_last_name, client_rut=client_rut,
                 client_email=client_email, client_whatsapp=client_whatsapp,
                 start_datetime=start_datetime
             )
-            return render(request, 'success.html', {'service': service, 'appointment': appointment, 'profile': profile})
+            # 2. PATRÓN PRG: REDIRIGE a la nueva página de éxito en lugar de renderizarla aquí
+            return redirect('booking_success', profile_slug=profile.slug, appointment_id=appointment.id)
             
         except Exception as e:
             messages.error(request, f"Error al agendar. Inténtalo de nuevo. ({e})")
 
     return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
+
+# --- NUEVA VISTA PARA DIBUJAR LA PANTALLA DE ÉXITO ---
+def booking_success_view(request, profile_slug, appointment_id):
+    profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
+    appointment = get_object_or_404(Appointment, id=appointment_id, professional=profile)
+    
+    # Renderizamos success.html pasándole la información de la cita
+    return render(request, 'success.html', {
+        'service': appointment.service, 
+        'appointment': appointment, 
+        'profile': profile
+    })
