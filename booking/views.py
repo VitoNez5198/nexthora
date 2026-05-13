@@ -110,12 +110,19 @@ def dashboard_view(request):
     ).order_by('start_datetime')
 
     next_appointment = today_appointments.filter(start_datetime__gte=now).first()
-    pending_count = Appointment.objects.filter(professional=profile, status='PENDING').count()
+    
+    # NUEVO: Enviar la lista de citas pendientes completas para el Popup de Notificaciones
+    pending_appointments = Appointment.objects.filter(
+        professional=profile, status='PENDING'
+    ).order_by('created_at')
+    
+    pending_count = pending_appointments.count()
 
     return render(request, 'dashboard.html', {
         'today_appointments': today_appointments,
         'tomorrow_appointments': tomorrow_appointments,
         'next_appointment': next_appointment,
+        'pending_appointments': pending_appointments, # Añadido aquí
         'pending_count': pending_count,
         'today_date': today,
         'tomorrow_date': tomorrow,
@@ -335,14 +342,12 @@ def booking_confirm_view(request, profile_slug, service_id):
             start_datetime_naive = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')
             start_datetime = timezone.make_aware(start_datetime_naive)
             
-            # 1. Crea la cita en la base de datos
             appointment = Appointment.objects.create(
                 professional=profile, service=service, client_name=client_name,
                 client_last_name=client_last_name, client_rut=client_rut,
                 client_email=client_email, client_whatsapp=client_whatsapp,
                 start_datetime=start_datetime
             )
-            # 2. PATRÓN PRG: REDIRIGE a la nueva página de éxito en lugar de renderizarla aquí
             return redirect('booking_success', profile_slug=profile.slug, appointment_id=appointment.id)
             
         except Exception as e:
@@ -350,12 +355,9 @@ def booking_confirm_view(request, profile_slug, service_id):
 
     return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
 
-# --- NUEVA VISTA PARA DIBUJAR LA PANTALLA DE ÉXITO ---
 def booking_success_view(request, profile_slug, appointment_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
     appointment = get_object_or_404(Appointment, id=appointment_id, professional=profile)
-    
-    # Renderizamos success.html pasándole la información de la cita
     return render(request, 'success.html', {
         'service': appointment.service, 
         'appointment': appointment, 
