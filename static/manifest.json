@@ -1,0 +1,17 @@
+{
+  "name": "Nexthora Pro",
+  "short_name": "Nexthora",
+  "start_url": "/dashboard/",
+  "display": "standalone",
+  "background_color": "#F9FAFB",
+  "theme_color": "#004ac6",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1006/1006509.png", 
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+
+

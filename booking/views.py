@@ -53,7 +53,8 @@ def login_view(request):
 def profile_setup_view(request):
     profile = request.user.profile
     if request.method == 'POST':
-        form = ProfessionalProfileForm(request.POST, instance=profile)
+        # Agregamos request.FILES para poder procesar la foto subida
+        form = ProfessionalProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, "¡Tu perfil ha sido actualizado con éxito!")
@@ -62,7 +63,6 @@ def profile_setup_view(request):
         form = ProfessionalProfileForm(instance=profile)
     
     return render(request, 'profile_setup.html', {'form': form})
-
 
 @login_required
 def dashboard_view(request):
@@ -275,8 +275,8 @@ def booking_confirm_view(request, profile_slug, service_id):
         client_whatsapp = request.POST.get('client_whatsapp')
         
         if not all([client_name, client_last_name, client_rut, client_email, client_whatsapp]):
-             messages.error(request, "Por favor completa todos los campos.")
-             return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
+            messages.error(request, "Por favor completa todos los campos.")
+            return render(request, 'booking_confirm.html', {'profile': profile, 'service': service, 'date_str': date_str, 'time_str': time_str})
 
         try:
             start_datetime_naive = datetime.strptime(f"{date_str} {time_str}", '%Y-%m-%d %H:%M')

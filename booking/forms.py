@@ -20,12 +20,15 @@ class NexthoraUserCreationForm(UserCreationForm):
         return user
 
 # --- FORMULARIO DE PERFIL PROFESIONAL ---
+
 class ProfessionalProfileForm(forms.ModelForm):
     class Meta:
         model = ProfessionalProfile
-        # Añadimos TODAS las redes sociales
-        fields = ['display_name', 'slug', 'bio', 'instagram_url', 'website_url', 'linkedin_url', 'facebook_url']
+        # Añadimos profile_picture
+        fields = ['profile_picture', 'display_name', 'slug', 'bio', 'instagram_url', 'website_url', 'linkedin_url', 'facebook_url']
         widgets = {
+            # El ImageField usa ClearableFileInput por defecto, podemos estilizarlo un poco
+            'profile_picture': forms.ClearableFileInput(attrs={'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}),
             'display_name': forms.TextInput(attrs={'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'Ej: Alexander Thorne o Consultoría Thorne'}),
             'slug': forms.TextInput(attrs={'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'mi-negocio'}),
             'bio': forms.Textarea(attrs={'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all resize-none', 'rows': 4, 'placeholder': 'Comparte tu experiencia, pasión y lo que los clientes pueden esperar...'}),
@@ -35,6 +38,7 @@ class ProfessionalProfileForm(forms.ModelForm):
             'facebook_url': forms.URLInput(attrs={'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'https://facebook.com/tu_pagina'}),
         }
         labels = {
+            'profile_picture': 'Foto de Perfil',
             'display_name': 'Nombre Completo / Nombre del Negocio',
             'slug': 'URL Personalizada',
             'bio': 'Sobre ti',
@@ -43,6 +47,7 @@ class ProfessionalProfileForm(forms.ModelForm):
             'linkedin_url': 'Perfil de LinkedIn',
             'facebook_url': 'Página de Facebook',
         }
+
 
 # --- FORMULARIO DE SERVICIOS ---
 class ServiceForm(forms.ModelForm):

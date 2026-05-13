@@ -12,9 +12,15 @@
         <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-blue-50 to-blue-100"></div>
         
         <!-- Avatar Visual -->
+        {% if profile.profile_picture %}
+        <div class="relative z-10 w-24 h-24 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-4xl font-bold shadow-md mb-4 ring-4 ring-white overflow-hidden">
+             <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="w-full h-full object-cover">
+        </div>
+        {% else %}
         <div class="relative z-10 w-24 h-24 bg-blue-600 rounded-full mx-auto flex items-center justify-center text-white text-4xl font-bold shadow-md mb-4 ring-4 ring-white">
             {{ profile.display_name|default:profile.user.username|slice:":1"|upper }}
         </div>
+        {% endif %}
 
         <h1 class="text-2xl font-bold text-gray-900 font-display tracking-tight">{{ profile.display_name|default:profile.user.username }}</h1>
 

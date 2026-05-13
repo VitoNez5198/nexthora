@@ -11,11 +11,14 @@ class ProfessionalProfile(models.Model):
     display_name = models.CharField(max_length=100, help_text="El nombre de tu negocio.")
     bio = models.TextField(max_length=500, blank=True, null=True, help_text="Describe brevemente tus servicios.")
     
+    # --- NUEVO: FOTO DE PERFIL ---
+    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True, help_text="Sube una foto de perfil cuadrada.")
+    
     # --- CAMPOS REDES SOCIALES ---
     instagram_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu perfil de Instagram")
     website_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu sitio web o portafolio")
-    linkedin_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu perfil de LinkedIn") # Nuevo
-    facebook_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu página de Facebook") # Nuevo
+    linkedin_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu perfil de LinkedIn")
+    facebook_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu página de Facebook")
 
     def __str__(self):
         return self.user.username
