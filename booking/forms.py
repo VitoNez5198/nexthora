@@ -21,7 +21,7 @@ class NexthoraUserCreationForm(UserCreationForm):
             user.save()
         return user
 
-# --- NUEVO: FORMULARIO DE ACTUALIZACIÓN DE CUENTA ---
+# --- FORMULARIO DE ACTUALIZACIÓN DE CUENTA ---
 class AccountSettingsForm(forms.ModelForm):
     class Meta:
         model = User
@@ -128,7 +128,8 @@ class BatchScheduleForm(forms.Form):
     
     days = forms.MultipleChoiceField(
         choices=WEEKDAYS,
-        widget=forms.CheckboxSelectMultiple(attrs={'class': 'hidden'}), 
+        # SOLUCIÓN: Añadimos la clase 'peer' aquí al lado de 'hidden'
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'hidden peer'}), 
         label="Días"
     )
     start_time = forms.ChoiceField(

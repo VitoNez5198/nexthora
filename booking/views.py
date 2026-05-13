@@ -10,10 +10,12 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm, AccountSettingsForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
+# --- ACTUALIZADO: Ahora muestra la Landing Page en vez de redirigir al Login ---
 def index_view(request):
     if request.user.is_authenticated: 
         return redirect('dashboard')
-    return redirect('login')
+    # Si no está logueado, le mostramos la página de ventas
+    return render(request, 'index.html')
 
 def register_view(request):
     if request.method == 'POST':
@@ -111,7 +113,6 @@ def dashboard_view(request):
 
     next_appointment = today_appointments.filter(start_datetime__gte=now).first()
     
-    # NUEVO: Enviar la lista de citas pendientes completas para el Popup de Notificaciones
     pending_appointments = Appointment.objects.filter(
         professional=profile, status='PENDING'
     ).order_by('created_at')
@@ -122,7 +123,7 @@ def dashboard_view(request):
         'today_appointments': today_appointments,
         'tomorrow_appointments': tomorrow_appointments,
         'next_appointment': next_appointment,
-        'pending_appointments': pending_appointments, # Añadido aquí
+        'pending_appointments': pending_appointments,
         'pending_count': pending_count,
         'today_date': today,
         'tomorrow_date': tomorrow,

@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+/* 1. Dónde buscar las clases de Tailwind */
+@source "./templates";
+@source "./booking";
+
+/* 2. Tus fuentes personalizadas */
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-display: "Manrope", sans-serif;
+}
