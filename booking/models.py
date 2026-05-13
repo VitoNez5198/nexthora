@@ -1,6 +1,7 @@
+import os
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 import datetime
@@ -10,11 +11,11 @@ class ProfessionalProfile(models.Model):
     slug = models.SlugField(max_length=100, unique=True, blank=True, help_text="La URL pública de tu perfil.")
     display_name = models.CharField(max_length=100, help_text="El nombre de tu negocio.")
     bio = models.TextField(max_length=500, blank=True, null=True, help_text="Describe brevemente tus servicios.")
-    
-    # --- NUEVO: FOTO DE PERFIL ---
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True, help_text="Sube una foto de perfil cuadrada.")
     
-    # --- CAMPOS REDES SOCIALES ---
+    # NUEVO: Botón de apagado/encendido del perfil público
+    is_active = models.BooleanField(default=True, help_text="Si es False, el perfil público mostrará que no está disponible.")
+
     instagram_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu perfil de Instagram")
     website_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu sitio web o portafolio")
     linkedin_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu perfil de LinkedIn")
@@ -33,6 +34,20 @@ class ProfessionalProfile(models.Model):
                 counter += 1
             self.slug = new_slug
         super().save(*args, **kwargs)
+
+# NUEVO: MAGIA PARA REEMPLAZAR LA FOTO ANTIGUA Y NO ACUMULAR BASURA
+@receiver(pre_save, sender=ProfessionalProfile)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    if not instance.pk:
+        return False
+    try:
+        old_file = ProfessionalProfile.objects.get(pk=instance.pk).profile_picture
+    except ProfessionalProfile.DoesNotExist:
+        return False
+    new_file = instance.profile_picture
+    if not old_file == new_file and old_file:
+        if os.path.isfile(old_file.path):
+            os.remove(old_file.path)
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
@@ -67,6 +82,7 @@ class Service(models.Model):
 
 class Appointment(models.Model):
     STATUS_CHOICES = [
+        ('PENDING', 'Pendiente'),
         ('CONFIRMED', 'Confirmada'),
         ('CANCELLED_BY_CLIENT', 'Cancelada por Cliente'),
         ('CANCELLED_BY_PRO', 'Cancelada por Profesional'),
@@ -82,7 +98,7 @@ class Appointment(models.Model):
     
     start_datetime = models.DateTimeField(help_text="Fecha y hora de inicio de la cita")
     end_datetime = models.DateTimeField(help_text="Fecha y hora de fin de la cita")
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='CONFIRMED')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

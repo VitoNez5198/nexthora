@@ -11,31 +11,26 @@ urlpatterns = [
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 
-    # --- GESTIÓN DEL PERFIL PROFESIONAL (NUEVO) ---
     path('dashboard/profile/', views.profile_setup_view, name='profile_setup'),
+    path('dashboard/profile/toggle/', views.toggle_profile_visibility, name='toggle_profile_visibility'), # NUEVA
 
-    # --- GESTIÓN DE SERVICIOS ---
     path('dashboard/services/', views.services_view, name='services'), 
     path('dashboard/services/edit/<int:service_id>/', views.edit_service_view, name='edit_service'),
     path('dashboard/services/toggle/<int:service_id>/', views.toggle_service_view, name='toggle_service'),
     path('dashboard/services/delete/<int:service_id>/', views.delete_service_view, name='delete_service'),
     
-    # --- GESTIÓN DE HORARIOS ----
     path('dashboard/schedule/', views.schedule_view, name='schedule'),
     path('dashboard/schedule/delete/<int:schedule_id>/', views.delete_schedule_view, name='delete_schedule'),
     path('dashboard/schedule/delete-off/<int:timeoff_id>/', views.delete_timeoff_view, name='delete_timeoff'),
 
-    # --- GESTIÓN DE CITAS (AGENDA) ---
     path('dashboard/appointments/', views.appointments_view, name='appointments'),
+    path('dashboard/appointments/<int:appt_id>/status/<str:new_status>/', views.update_appointment_status, name='update_appointment_status'),
     
-    # --- FLUJO DE RESERVA (CLIENTE) ----
     path('<slug:profile_slug>/book/<int:service_id>/', views.booking_view, name='booking_step1'),
     path('<slug:profile_slug>/book/<int:service_id>/confirm/', views.booking_confirm_view, name='booking_step2'),
     
-    # --- RUTA PÚBLICA (¡SIEMPRE AL FINAL!) ---
     path('<slug:profile_slug>/', views.profile_view, name='public_profile'),
 ]
 
-# --- PARA MOSTRAR LAS IMÁGENES EN MODO DESARROLLO ---
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

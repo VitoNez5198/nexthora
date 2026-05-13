@@ -2,17 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
-# Importación necesaria para el login
 from django.contrib.auth.forms import AuthenticationForm
 
-# Importación de Formularios y Modelos locales
 from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
-# ... (Vistas de Auth se mantienen) ...
 def index_view(request):
     if request.user.is_authenticated: 
         return redirect('dashboard')
@@ -45,15 +42,12 @@ def login_view(request):
             messages.error(request, "Usuario o contraseña inválidos.")
     else:
         form = AuthenticationForm()
-
     return render(request, 'login.html', {'form': form})
 
-# --- VISTA DE CONFIGURACIÓN DE PERFIL (NUEVA) ---
 @login_required
 def profile_setup_view(request):
     profile = request.user.profile
     if request.method == 'POST':
-        # Agregamos request.FILES para poder procesar la foto subida
         form = ProfessionalProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
@@ -61,8 +55,16 @@ def profile_setup_view(request):
             return redirect('profile_setup')
     else:
         form = ProfessionalProfileForm(instance=profile)
-    
     return render(request, 'profile_setup.html', {'form': form})
+
+@login_required
+def toggle_profile_visibility(request):
+    if request.method == 'POST':
+        profile = request.user.profile
+        profile.is_active = not profile.is_active
+        profile.save()
+        return JsonResponse({'success': True, 'is_active': profile.is_active})
+    return JsonResponse({'success': False}, status=400)
 
 @login_required
 def dashboard_view(request):
@@ -71,14 +73,24 @@ def dashboard_view(request):
     today = now.date()
     tomorrow = today + timedelta(days=1)
 
-    today_appointments = Appointment.objects.filter(professional=profile, start_datetime__date=today, status='CONFIRMED').order_by('start_datetime')
-    tomorrow_appointments = Appointment.objects.filter(professional=profile, start_datetime__date=tomorrow, status='CONFIRMED').order_by('start_datetime')
+    today_appointments = Appointment.objects.filter(
+        professional=profile, start_datetime__date=today, status__in=['PENDING', 'CONFIRMED']
+    ).order_by('start_datetime')
+    
+    tomorrow_appointments = Appointment.objects.filter(
+        professional=profile, start_datetime__date=tomorrow, status__in=['PENDING', 'CONFIRMED']
+    ).order_by('start_datetime')
+
+    # NUEVO: Lógica exacta para encontrar la PRÓXIMA cita de hoy que aún no ha pasado
+    next_appointment = today_appointments.filter(start_datetime__gte=now).first()
 
     return render(request, 'dashboard.html', {
         'today_appointments': today_appointments,
         'tomorrow_appointments': tomorrow_appointments,
+        'next_appointment': next_appointment,
         'today_date': today,
-        'tomorrow_date': tomorrow
+        'tomorrow_date': tomorrow,
+        'profile': profile
     })
 
 @login_required
@@ -205,9 +217,30 @@ def appointments_view(request):
         profile = request.user.profile
     except:
         return redirect('dashboard')
-    upcoming_appointments = Appointment.objects.filter(professional=profile, start_datetime__gte=timezone.now()).order_by('start_datetime')
-    past_appointments = Appointment.objects.filter(professional=profile, start_datetime__lt=timezone.now()).order_by('-start_datetime')
+    
+    upcoming_appointments = Appointment.objects.filter(
+        professional=profile, start_datetime__gte=timezone.now(), status__in=['PENDING', 'CONFIRMED']
+    ).order_by('start_datetime')
+    
+    past_appointments = Appointment.objects.filter(
+        professional=profile, start_datetime__lt=timezone.now()
+    ).exclude(status='PENDING').order_by('-start_datetime')
+    
     return render(request, 'appointments.html', {'upcoming_appointments': upcoming_appointments, 'past_appointments': past_appointments})
+
+@login_required
+def update_appointment_status(request, appt_id, new_status):
+    if request.method == 'POST':
+        appt = get_object_or_404(Appointment, id=appt_id, professional=request.user.profile)
+        valid_statuses = [choice[0] for choice in Appointment.STATUS_CHOICES]
+        
+        if new_status in valid_statuses:
+            appt.status = new_status
+            appt.save()
+            return JsonResponse({'success': True, 'status': new_status})
+            
+    return JsonResponse({'success': False}, status=400)
+
 
 def get_available_slots(profile, service, check_date):
     is_blocked = TimeOff.objects.filter(professional=profile, start_date__lte=check_date, end_date__gte=check_date).exists()
@@ -219,7 +252,10 @@ def get_available_slots(profile, service, check_date):
     except BusinessHours.DoesNotExist:
         return []
 
-    existing_appointments = Appointment.objects.filter(professional=profile, start_datetime__date=check_date)
+    existing_appointments = Appointment.objects.filter(
+        professional=profile, start_datetime__date=check_date, status__in=['PENDING', 'CONFIRMED']
+    )
+    
     slots = []
     current_time = datetime.combine(check_date, work_hours.start_time)
     end_work_time = datetime.combine(check_date, work_hours.end_time)
@@ -251,6 +287,8 @@ def profile_view(request, profile_slug):
 
 def booking_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
+    if not profile.is_active:
+        return redirect('public_profile', profile_slug=profile.slug)
     service = get_object_or_404(Service, id=service_id, professional=profile)
     date_str = request.GET.get('date')
     if date_str:
@@ -262,6 +300,8 @@ def booking_view(request, profile_slug, service_id):
 
 def booking_confirm_view(request, profile_slug, service_id):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
+    if not profile.is_active:
+        return redirect('public_profile', profile_slug=profile.slug)
     service = get_object_or_404(Service, id=service_id, professional=profile)
     
     date_str = request.GET.get('date')
