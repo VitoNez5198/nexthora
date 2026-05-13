@@ -3,7 +3,7 @@
 {% block title %}Mi Horario - Nexthora{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto py-8">
+<div class="max-w-6xl mx-auto py-8 px-4 w-full">
     
     <!-- ENCABEZADO -->
     <div class="flex justify-between items-center mb-6">
@@ -23,15 +23,12 @@
             <form method="POST" id="batchScheduleForm" class="mb-6 bg-gray-50 p-5 rounded-lg border border-gray-200">
                 {% csrf_token %}
                 
-                <!-- SELECCIÓN DE DÍAS -->
                 <div class="mb-4">
                     <label class="text-xs font-bold text-gray-500 uppercase block mb-3 tracking-wide">Selecciona los días</label>
                     <div class="flex justify-between gap-1">
                         {% for checkbox in hours_form.days %}
                         <label class="cursor-pointer relative">
-                            <!-- Input Oculto -->
                             {{ checkbox.tag }}
-                            <!-- Estilo Visual -->
                             <div class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 bg-white text-gray-500 font-bold text-sm transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-gray-50 shadow-sm">
                                 {{ checkbox.choice_label }}
                             </div>
@@ -40,7 +37,6 @@
                     </div>
                 </div>
 
-                <!-- SELECCIÓN DE HORAS -->
                 <div class="grid grid-cols-2 gap-4 mb-5">
                     <div>
                         <label class="text-xs font-bold text-gray-500 uppercase block mb-2 tracking-wide">Desde</label>
@@ -52,7 +48,6 @@
                     </div>
                 </div>
 
-                <!-- MENSAJE DE ERROR JS -->
                 <div id="js-error-message" class="hidden mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-200 font-medium flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span id="js-error-text">Debes seleccionar al menos un día.</span>
@@ -63,10 +58,8 @@
                 </button>
             </form>
 
-            <!-- Lista de Horarios Actuales -->
             <div class="space-y-3 max-h-80 overflow-y-auto pr-1">
                 {% regroup schedule by get_weekday_display as day_list %}
-                
                 {% for day in day_list %}
                 <div class="border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                     <div class="bg-gray-50 px-4 py-2 text-xs font-bold text-gray-700 uppercase border-b border-gray-200">

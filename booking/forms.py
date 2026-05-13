@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
+from django.utils.text import slugify
 from .models import Service, BusinessHours, TimeOff, ProfessionalProfile
 import datetime
 
@@ -20,17 +22,22 @@ class NexthoraUserCreationForm(UserCreationForm):
         return user
 
 # --- FORMULARIO DE PERFIL PROFESIONAL ---
-
 class ProfessionalProfileForm(forms.ModelForm):
+    slug = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 
+            'placeholder': 'mi-negocio'
+        })
+    )
+
     class Meta:
         model = ProfessionalProfile
-        # Añadimos profile_picture
         fields = ['profile_picture', 'display_name', 'slug', 'bio', 'instagram_url', 'website_url', 'linkedin_url', 'facebook_url']
         widgets = {
-            # El ImageField usa ClearableFileInput por defecto, podemos estilizarlo un poco
-            'profile_picture': forms.ClearableFileInput(attrs={'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100'}),
+            # NUEVO: Cambiado a FileInput estándar para quitar el texto feo de Django
+            'profile_picture': forms.FileInput(attrs={'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer'}),
             'display_name': forms.TextInput(attrs={'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'Ej: Alexander Thorne o Consultoría Thorne'}),
-            'slug': forms.TextInput(attrs={'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'mi-negocio'}),
             'bio': forms.Textarea(attrs={'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all resize-none', 'rows': 4, 'placeholder': 'Comparte tu experiencia, pasión y lo que los clientes pueden esperar...'}),
             'instagram_url': forms.URLInput(attrs={'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'https://instagram.com/tu_usuario'}),
             'website_url': forms.URLInput(attrs={'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'https://tusitio.com'}),
@@ -48,6 +55,28 @@ class ProfessionalProfileForm(forms.ModelForm):
             'facebook_url': 'Página de Facebook',
         }
 
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug')
+        if slug:
+            slug_formateado = slugify(slug)
+            palabras_reservadas = ['admin', 'dashboard', 'login', 'register', 'logout', 'api']
+            if slug_formateado in palabras_reservadas:
+                raise ValidationError("Esta URL no está disponible. Por favor, elige otra.")
+            if ProfessionalProfile.objects.filter(slug=slug_formateado).exclude(pk=self.instance.pk).exists():
+                raise ValidationError("Este enlace ya está en uso por otro profesional.")
+            return slug_formateado
+        return slug
+
+    def clean_profile_picture(self):
+        foto = self.cleaned_data.get('profile_picture')
+        if foto:
+            limite_mb = 2
+            if foto.size > limite_mb * 1024 * 1024:
+                raise ValidationError(f"La imagen es muy pesada. El tamaño máximo permitido es {limite_mb}MB.")
+            extensiones_validas = ['.jpg', '.jpeg', '.png', '.webp']
+            if not any(foto.name.lower().endswith(ext) for ext in extensiones_validas):
+                 raise ValidationError("Formato no válido. Sube una imagen en JPG, PNG o WEBP.")
+        return foto
 
 # --- FORMULARIO DE SERVICIOS ---
 class ServiceForm(forms.ModelForm):

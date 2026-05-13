@@ -3,7 +3,7 @@
 {% block title %}Mis Servicios - Nexthora{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto py-8">
+<div class="max-w-6xl mx-auto py-8 px-4 w-full">
 
     <!-- ENCABEZADO -->
     <div class="flex justify-between items-center mb-6">
@@ -93,7 +93,6 @@
                     </div>
 
                     <div class="flex items-center gap-2 pl-4">
-                        <!-- Botón Ocultar/Mostrar -->
                         <a href="{% url 'toggle_service' service.id %}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100" title="{% if service.is_active %}Ocultar{% else %}Mostrar{% endif %}">
                             {% if service.is_active %}
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -101,13 +100,9 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.71-1.58c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
                             {% endif %}
                         </a>
-
-                        <!-- Botón Editar -->
                         <a href="{% url 'edit_service' service.id %}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100" title="Editar">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                         </a>
-
-                        <!-- Botón Borrar -->
                         <form method="POST" action="{% url 'delete_service' service.id %}" onsubmit="return confirm('¿Estás seguro de eliminar este servicio?');">
                             {% csrf_token %}
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-100" title="Eliminar">
@@ -119,7 +114,6 @@
                 {% endfor %}
             </div>
             {% else %}
-            <!-- Estado Vacío -->
             <div class="bg-gray-50 rounded-xl border border-gray-200 p-10 text-center">
                 <div class="w-16 h-16 bg-white border border-gray-200 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.121 14.121L19 19m-4.879-4.879l-4.242-4.242m4.242 4.242L19 9m-4.879 4.879A2.121 2.121 0 0112 15a2.121 2.121 0 01-1.5-3.621m4.242-4.242L9 3m4.879 4.879A2.121 2.121 0 0112 9a2.121 2.121 0 01-1.5 3.621m-4.242-4.242L3 9m4.879 4.879L3 19"></path></svg>

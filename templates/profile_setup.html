@@ -11,7 +11,7 @@
         <p class="text-gray-500">Cuéntale a tus clientes un poco más sobre ti y tu negocio.</p>
     </div>
 
-    <!-- AGREGAMOS enctype="multipart/form-data" para permitir subida de archivos -->
+    <!-- enctype="multipart/form-data" para permitir subida de archivos -->
     <form method="POST" enctype="multipart/form-data" class="space-y-8">
         {% csrf_token %}
 
@@ -21,20 +21,32 @@
                 <!-- Avatar Visual y Subida de Archivo -->
                 <div class="flex flex-col items-center mb-10">
                     <div class="relative group">
-                        {% if user.profile.profile_picture %}
-                        <div class="w-28 h-28 rounded-full overflow-hidden ring-4 ring-gray-50 bg-blue-50 flex items-center justify-center border border-blue-100">
-                             <img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture" class="w-full h-full object-cover">
+                        <!-- Contenedor del Avatar unificado para la vista previa JS -->
+                        <div class="w-28 h-28 rounded-full overflow-hidden ring-4 ring-gray-50 bg-blue-50 flex items-center justify-center border border-blue-100 shadow-sm relative">
+                            
+                            <!-- La etiqueta img está siempre, pero se oculta si no hay foto en BD -->
+                            <img id="avatar-preview" 
+                                 src="{% if user.profile.profile_picture %}{{ user.profile.profile_picture.url }}{% endif %}" 
+                                 alt="Profile Preview" 
+                                 class="w-full h-full object-cover {% if not user.profile.profile_picture %}hidden{% endif %}">
+                            
+                            <!-- Si no hay foto, mostramos la inicial (que se ocultará por JS al seleccionar una foto) -->
+                            {% if not user.profile.profile_picture %}
+                            <span id="avatar-initial" class="text-4xl font-bold text-blue-600">{{ user.username|slice:":1"|upper }}</span>
+                            {% endif %}
                         </div>
-                        {% else %}
-                        <div class="w-28 h-28 rounded-full overflow-hidden ring-4 ring-gray-50 bg-blue-50 flex items-center justify-center border border-blue-100">
-                            <span class="text-4xl font-bold text-blue-600">{{ user.username|slice:":1"|upper }}</span>
-                        </div>
-                        {% endif %}
                     </div>
                     
-                    <div class="mt-4 text-center w-full max-w-sm">
-                        {{ form.profile_picture }}
-                        {% for error in form.profile_picture.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+                    <div class="mt-5 text-center w-full max-w-xs mx-auto">
+                        <div class="bg-gray-50 p-2 rounded-xl border border-gray-100">
+                            {{ form.profile_picture }}
+                        </div>
+                        <!-- Texto de ayuda para el usuario -->
+                        <p class="text-[11px] text-gray-500 mt-2 font-medium">Formatos permitidos: JPG, PNG o WEBP. <br> Tamaño máximo: 2MB.</p>
+                        
+                        {% for error in form.profile_picture.errors %}
+                        <p class="text-xs text-red-600 mt-2 font-bold">{{ error }}</p>
+                        {% endfor %}
                     </div>
                 </div>
 
@@ -42,6 +54,9 @@
                     <div class="space-y-1.5">
                         <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.display_name.label }}</label>
                         {{ form.display_name }}
+                        {% for error in form.display_name.errors %}
+                        <p class="text-xs text-red-600 font-bold mt-1">{{ error }}</p>
+                        {% endfor %}
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.slug.label }}</label>
@@ -50,6 +65,9 @@
                             {{ form.slug }}
                         </div>
                         <p class="text-[11px] text-gray-400 mt-1">Este será tu enlace único para recibir reservas.</p>
+                        {% for error in form.slug.errors %}
+                        <p class="text-xs text-red-600 font-bold mt-1">{{ error }}</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
@@ -66,7 +84,7 @@
                     <label class="text-xs font-bold uppercase tracking-wider text-gray-500">{{ form.bio.label }}</label>
                     {{ form.bio }}
                     <p class="text-[11px] text-gray-400 mt-1 text-right">Máximo 500 caracteres.</p>
-                    {% for error in form.bio.errors %}<p class="text-xs text-red-600 mt-1">{{ error }}</p>{% endfor %}
+                    {% for error in form.bio.errors %}<p class="text-xs text-red-600 mt-1 font-bold">{{ error }}</p>{% endfor %}
                 </div>
             </div>
         </section>
@@ -137,4 +155,35 @@
         </div>
     </form>
 </div>
+
+<!-- LÓGICA JAVASCRIPT PARA LA VISTA PREVIA -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Django por defecto le pone id="id_profile_picture" al input de archivo
+        const fileInput = document.getElementById('id_profile_picture');
+        const avatarPreview = document.getElementById('avatar-preview');
+        const avatarInitial = document.getElementById('avatar-initial');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function(event) {
+                // Obtenemos el archivo que el usuario acaba de seleccionar
+                const file = event.target.files[0];
+                
+                if (file) {
+                    // Creamos una URL temporal (local en el navegador) para leer la imagen
+                    const objectUrl = URL.createObjectURL(file);
+                    
+                    // Actualizamos el 'src' de la imagen y le quitamos la clase 'hidden'
+                    avatarPreview.src = objectUrl;
+                    avatarPreview.classList.remove('hidden');
+                    
+                    // Si existía la inicial (el texto azul), la ocultamos
+                    if (avatarInitial) {
+                        avatarInitial.classList.add('hidden');
+                    }
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
