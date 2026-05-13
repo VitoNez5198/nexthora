@@ -13,18 +13,38 @@
         </a>
     </div>
 
-    <!-- SCRIPT DE WHATSAPP -->
+    <!-- LOGICA JS Y FETCH -->
     <script>
-        function confirmarCitaWA(phone, name, service, dateStr, time) {
-            const text = `Hola ${name}, te escribo para confirmar tu cita de ${service} agendada para el ${dateStr} a las ${time}. ¡Te espero!`;
-            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+        function getCSRFToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
         }
 
-        function rechazarCitaWA(phone, name, dateStr, time) {
+        function confirmarCitaWA(apptId, phone, name, service, dateStr, time) {
+            fetch(`/dashboard/appointments/${apptId}/status/CONFIRMED/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' }
+            }).then(response => {
+                if(response.ok){
+                    const text = `Hola ${name}, te escribo para confirmar tu cita de ${service} agendada para el ${dateStr} a las ${time}. ¡Te espero!`;
+                    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+                    window.location.reload();
+                }
+            });
+        }
+
+        function rechazarCitaWA(apptId, phone, name, dateStr, time) {
             const motivo = prompt(`¿Por qué motivo debes cancelar la cita de ${name}? (Esto se enviará por WhatsApp)`);
             if (motivo !== null && motivo.trim() !== "") {
-                const text = `Hola ${name}. Lamentablemente me veo en la obligación de cancelar tu cita de las ${time} agendada para el ${dateStr}. Motivo: ${motivo}. Por favor, vuelve a agendar a través de mi perfil. Disculpa los inconvenientes.`;
-                window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+                fetch(`/dashboard/appointments/${apptId}/status/CANCELLED_BY_PRO/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': getCSRFToken(), 'Content-Type': 'application/json' }
+                }).then(response => {
+                    if(response.ok){
+                        const text = `Hola ${name}. Lamentablemente me veo en la obligación de cancelar tu cita de las ${time} agendada para el ${dateStr}. Motivo: ${motivo}. Por favor, vuelve a agendar a través de mi perfil. Disculpa los inconvenientes.`;
+                        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+                        window.location.reload();
+                    }
+                });
             }
         }
     </script>
@@ -62,10 +82,24 @@
                             <div class="text-sm text-gray-600 font-medium mt-1">
                                 {{ cita.service.name }}
                             </div>
+
+                            <!-- Botones de Confirmar/Rechazar -->
+                            {% if cita.status == 'PENDING' %}
+                            <div class="mt-2.5 flex gap-2">
+                                <button onclick="confirmarCitaWA('{{ cita.id }}', '{{ cita.client_whatsapp|slice:'1:' }}', '{{ cita.client_name }}', '{{ cita.service.name }}', '{{ cita.start_datetime|date:'d/m/Y' }}', '{{ cita.start_datetime|time:'H:i' }}')" 
+                                    class="text-[11px] font-bold px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 transition-colors flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Confirmar
+                                </button>
+                                <button onclick="rechazarCitaWA('{{ cita.id }}', '{{ cita.client_whatsapp|slice:'1:' }}', '{{ cita.client_name }}', '{{ cita.start_datetime|date:'d/m/Y' }}', '{{ cita.start_datetime|time:'H:i' }}')" 
+                                    class="text-[11px] font-bold px-2.5 py-1 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 transition-colors flex items-center gap-1">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> Rechazar
+                                </button>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
 
-                    <!-- 2. BLOQUE DERECHO (Datos y Botones) -->
+                    <!-- 2. BLOQUE DERECHO -->
                     <div class="w-full md:w-auto md:text-right pl-[86px] md:pl-0 mt-[-10px] md:mt-0 flex flex-col md:items-end">
                         <div class="font-bold text-gray-900 text-base">{{ cita.client_name }} {{ cita.client_last_name }}</div>
                         
@@ -82,20 +116,14 @@
                             {% endif %}
                         </div>
 
-                        <!-- Botones de Acción -->
-                        <div class="mt-3 flex gap-2">
-                            <button onclick="confirmarCitaWA('{{ cita.client_whatsapp|slice:'1:' }}', '{{ cita.client_name }}', '{{ cita.service.name }}', '{{ cita.start_datetime|date:'d/m/Y' }}', '{{ cita.start_datetime|time:'H:i' }}')" 
-                                class="text-xs font-bold px-3 py-1.5 bg-green-50 text-green-700 border border-green-200 rounded-md hover:bg-green-100 transition-colors flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                Confirmar
-                            </button>
-                            <button onclick="rechazarCitaWA('{{ cita.client_whatsapp|slice:'1:' }}', '{{ cita.client_name }}', '{{ cita.start_datetime|date:'d/m/Y' }}', '{{ cita.start_datetime|time:'H:i' }}')" 
-                                class="text-xs font-bold px-3 py-1.5 bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 transition-colors flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                                Rechazar
-                            </button>
+                        <!-- BADGES DE ESTADO -->
+                        <div class="mt-3 md:mt-2">
+                            {% if cita.status == 'PENDING' %}
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border bg-yellow-50 text-yellow-600 border-yellow-200">Pendiente</span>
+                            {% elif cita.status == 'CONFIRMED' %}
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border bg-green-50 text-green-700 border-green-200">Confirmada</span>
+                            {% endif %}
                         </div>
-                        
                     </div>
                 </div>
                 {% endfor %}

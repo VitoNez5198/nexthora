@@ -3,6 +3,7 @@
 {% block title %}Mi Horario - Nexthora{% endblock %}
 
 {% block content %}
+<!-- Aplicamos max-w-6xl y w-full para estandarizar ancho con el Dashboard -->
 <div class="max-w-6xl mx-auto py-8 px-4 w-full">
     
     <!-- ENCABEZADO -->
@@ -13,7 +14,7 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
-        <!-- SECCIÓN 1: HORARIO SEMANAL (BATCH) -->
+        <!-- SECCIÓN 1: HORARIO SEMANAL -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 Horario Semanal
@@ -160,19 +161,11 @@
                 let msg = "";
 
                 const checkedDays = document.querySelectorAll('input[name="hours-days"]:checked');
-                
-                if (checkedDays.length === 0) {
-                    hasError = true;
-                    msg = "Debes seleccionar al menos un día de la semana.";
-                }
+                if (checkedDays.length === 0) { hasError = true; msg = "Debes seleccionar al menos un día de la semana."; }
 
                 const startTime = document.getElementById('id_hours-start_time').value;
                 const endTime = document.getElementById('id_hours-end_time').value;
-                
-                if (!hasError && startTime >= endTime) {
-                    hasError = true;
-                    msg = "La hora de término debe ser posterior al inicio.";
-                }
+                if (!hasError && startTime >= endTime) { hasError = true; msg = "La hora de término debe ser posterior al inicio."; }
 
                 if (hasError) {
                     e.preventDefault();
@@ -180,22 +173,6 @@
                     errorDiv.classList.remove('hidden');
                 } else {
                     errorDiv.classList.add('hidden');
-                }
-            });
-        }
-
-        const startDateInput = document.getElementById('start_date');
-        const endDateInput = document.getElementById('end_date');
-        
-        if(startDateInput && endDateInput) {
-            const today = new Date().toISOString().split('T')[0];
-            startDateInput.setAttribute('min', today);
-            endDateInput.setAttribute('min', today);
-
-            startDateInput.addEventListener('change', function() {
-                endDateInput.setAttribute('min', this.value);
-                if (endDateInput.value && endDateInput.value < this.value) {
-                    endDateInput.value = this.value;
                 }
             });
         }

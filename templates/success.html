@@ -14,12 +14,11 @@
         <h1 class="text-2xl font-bold text-gray-900 mb-2">¡Reserva Exitosa!</h1>
         <p class="text-gray-500 mb-8 text-sm leading-relaxed">
             Tu cita ha sido agendada correctamente. <br>
-            Hemos notificado a <span class="font-semibold text-gray-900">{{ profile.display_name|default:profile.user.username }}</span>.
+            Hemos notificado a <span class="font-semibold text-gray-900">{{ profile.display_name|default:profile.user.username }}</span> para su confirmación.
         </p>
 
         <!-- CAJA DE DETALLES -->
         <div class="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6 text-left relative overflow-hidden">
-            <!-- Banda decorativa lateral -->
             <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-600"></div>
             
             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 pl-2">Resumen de tu cita</h3>
@@ -38,37 +37,34 @@
                 </div>
             </div>
             
-            <!-- Datos ocultos para JS (Formato YYYYMMDDTHHmmssZ) -->
+            <!-- Datos ocultos para JS -->
             <input type="hidden" id="start-date-utc" value="{{ appointment.start_datetime|date:'Ymd\THis' }}">
             <input type="hidden" id="end-date-utc" value="{{ appointment.end_datetime|date:'Ymd\THis' }}">
         </div>
 
-        <!-- BOTÓN GOOGLE CALENDAR (NUEVO) -->
+        <!-- BOTÓN GOOGLE CALENDAR -->
         <button onclick="addToGoogleCalendar()" class="w-full bg-white border border-gray-300 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-50 transition-all font-bold text-sm mb-3 flex items-center justify-center gap-2 shadow-sm">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm-1.5 4v2H9v8h1.5v-2H13v2h1.5V8H13v2h-2.5V6z"/></svg>
             Añadir a Google Calendar
         </button>
 
-        <!-- BOTÓN ÚNICO DE SALIDA -->
         <a href="{% url 'public_profile' profile.slug %}" class="w-full bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm active:scale-95 flex items-center justify-center gap-2">
             Volver al Perfil
         </a>
-        
-        <p class="text-xs text-gray-400 mt-5 font-medium">
-            Puedes cerrar esta ventana si has terminado.
-        </p>
     </div>
 </div>
 
 <script>
-    // JS para generar el link de Google Calendar dinámicamente
     function addToGoogleCalendar() {
-        const title = "Cita: " + document.getElementById('service-name').innerText;
-        const details = "Reserva generada mediante Nexthora con " + document.getElementById('pro-name').innerText;
+        // Título dinámico "Nexthora: Nombre Negocio / Nombre Servicio"
+        const proName = document.getElementById('pro-name').innerText;
+        const serviceName = document.getElementById('service-name').innerText;
+        
+        const title = `Nexthora: ${proName} / ${serviceName}`;
+        const details = `Reserva de servicio generada mediante Nexthora con ${proName}.`;
         const start = document.getElementById('start-date-utc').value;
         const end = document.getElementById('end-date-utc').value;
         
-        // Formato para URL de Google Calendar
         const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start}/${end}&details=${encodeURIComponent(details)}`;
         
         window.open(googleCalendarUrl, '_blank');
