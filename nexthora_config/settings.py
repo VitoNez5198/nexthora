@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from decouple import config # Reemplazamos dotenv por decouple
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -74,16 +75,12 @@ WSGI_APPLICATION = 'nexthora_config.wsgi.application'
 # ---
 # Usamos config() para leer del .env, y le damos un default por si falla
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='nexthora_db'),
-        'USER': config('DB_USER', default='nexthora_user'),
-        'PASSWORD': config('DB_PASSWORD', default='Technomax1'),
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
-
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
