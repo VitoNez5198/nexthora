@@ -1,29 +1,19 @@
-"""
-Configuración principal de Django para el proyecto Nexthora.
-"""
-
+import os
 from pathlib import Path
-import os # ¡Importante! Necesitamos 'os' para unir rutas
-from dotenv import load_dotenv # <-- NUEVO: Importamos dotenv
+from decouple import config # Reemplazamos dotenv por decouple
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# <-- NUEVO: Le decimos a Django que cargue las variables del archivo .env
-load_dotenv(os.path.join(BASE_DIR, '.env'))
-
 # Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
+# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# <-- MODIFICADO: Ahora lee tu clave secreta desde el .env
-SECRET_KEY = os.getenv('SECRET_KEY') 
+# Leemos las variables desde el .env
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# <-- MODIFICADO: Ahora lee el modo Debug desde el .env
-DEBUG = os.getenv('DEBUG') == 'True'
-
-ALLOWED_HOSTS = []
+# Permitimos todos los hosts para hacer las primeras pruebas de despliegue
+ALLOWED_HOSTS = ['*'] 
 
 
 # ---
@@ -35,20 +25,17 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic', # Ayuda a que WhiteNoise funcione en modo desarrollo
     'django.contrib.staticfiles',
 
-    # --- Aplicaciones de Terceros (las instalarás después) ---
-    # 'rest_framework',  # Para crear tu API (DRF)
-    # 'corsheaders',   # Para permitir que tu JS hable con tu API
-
-    # --- Tus Aplicaciones (La Magia) ---
-    'booking',         # ¡Tu app principal! (donde está models.py)
+    # --- Tus Aplicaciones ---
+    'booking', 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # NUEVO: WhiteNoise procesa los archivos estáticos rápido
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 'corsheaders.middleware.CorsMiddleware', # (Para la API)
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -56,16 +43,16 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Restaurado a tu carpeta original
 ROOT_URLCONF = 'nexthora_config.urls'
 
 # ---
 # CONFIGURACIÓN CLAVE 2: TEMPLATES (HTML)
 # ---
-# Le decimos a Django dónde encontrar tu carpeta 'templates' en la raíz.
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], # ¡Línea clave!
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,59 +65,72 @@ TEMPLATES = [
     },
 ]
 
+# Restaurado a tu carpeta original
 WSGI_APPLICATION = 'nexthora_config.wsgi.application'
 
 
 # ---
 # CONFIGURACIÓN CLAVE 3: LA BASE DE DATOS (PostgreSQL)
 # ---
-# <-- MODIFICADO: Ahora las contraseñas y usuarios están ocultos y se leen del .env
+# Usamos config() para leer del .env, y le damos un default por si falla
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),          # El nombre de tu BBDD en PostgreSQL
-        'USER': os.getenv('DB_USER'),          # Tu usuario de PostgreSQL
-        'PASSWORD': os.getenv('DB_PASSWORD'),  # Tu contraseña
-        'HOST': 'localhost',                   # O la dirección de tu BBDD
-        'PORT': '5432',                        # Puerto por defecto de PostgreSQL
+        'NAME': config('DB_NAME', default='nexthora_db'),
+        'USER': config('DB_USER', default='nexthora_user'),
+        'PASSWORD': config('DB_PASSWORD', default='Technomax1'),
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
-AUTH_PASSWORD_VALIDATORS = [ 
-    # ... (Se quedan los validadores por defecto) ...
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 
 
 # ---
 # CONFIGURACIÓN CLAVE 4: OTRAS CONFIGURACIONES
 # ---
-LANGUAGE_CODE = 'es-cl'  # Para que el admin esté en español chileno
-TIME_ZONE = 'America/Santiago' # ¡Crítico para tu app de agenda!
+LANGUAGE_CODE = 'es-cl'
+TIME_ZONE = 'America/Santiago'
 USE_I18N = True
-USE_TZ = True # ¡Crítico! Guarda todo en UTC en la BBDD.
+USE_TZ = True
+
 
 # ---
-# CONFIGURACIÓN CLAVE 5: STATIC FILES (CSS, JS)
+# CONFIGURACIÓN CLAVE 5: STATIC FILES Y MEDIA
 # ---
-# La URL para acceder a los archivos estáticos
-STATIC_URL = '/static/'
-
-# ¡Línea clave! Le decimos a Django dónde encontrar tu carpeta 'static' en la raíz.
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Por el warning que tenías
 
-# Media files (Archivos subidos por los usuarios)
+# Dónde están tus archivos de desarrollo (CSS, JS, Logo)
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Dónde se guardarán todos compilados cuando subamos a producción
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Activar la compresión y caché de WhiteNoise
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Archivos Multimedia (Las fotos que suben los profesionales)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Direcciones de Autenticación
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'dashboard'
