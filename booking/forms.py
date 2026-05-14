@@ -9,16 +9,45 @@ import datetime
 # --- FORMULARIO DE REGISTRO ---
 class NexthoraUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True, help_text="Requerido. Ingresa un email válido.")
+    display_name = forms.CharField(
+        max_length=100, 
+        required=True, 
+        help_text="El nombre de tu negocio o tu nombre profesional.",
+        label="Nombre del Negocio"
+    )
+    slug = forms.CharField(
+        max_length=100, 
+        required=True, 
+        help_text="Tu enlace personalizado. Ej: nexthora.com/tu-negocio",
+        label="URL Personalizada"
+    )
     
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ("email",)
+        fields = UserCreationForm.Meta.fields + ("email", "display_name", "slug")
+
+    def clean_slug(self):
+        slug = self.cleaned_data.get('slug')
+        if slug:
+            slug_formateado = slugify(slug)
+            palabras_reservadas = ['admin', 'dashboard', 'login', 'register', 'logout', 'api', 'settings']
+            if slug_formateado in palabras_reservadas:
+                raise ValidationError("Esta URL no está disponible. Por favor, elige otra.")
+            if ProfessionalProfile.objects.filter(slug=slug_formateado).exists():
+                raise ValidationError("Este enlace ya está en uso por otro profesional.")
+            return slug_formateado
+        return slug
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
         if commit:
-            user.save()
+            user.save() # Guarda el usuario y dispara la señal que crea el ProfessionalProfile
+            # Actualizamos el perfil recién creado
+            profile = user.profile
+            profile.display_name = self.cleaned_data["display_name"]
+            profile.slug = self.cleaned_data["slug"]
+            profile.save()
         return user
 
 # --- FORMULARIO DE ACTUALIZACIÓN DE CUENTA ---
