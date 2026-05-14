@@ -147,6 +147,46 @@
         </div>
 
     </div>
+
+    <!-- SECCIÓN 3: CONFIGURACIÓN AVANZADA (PRO) -->
+    <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            Configuración Avanzada
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {% if request.user.profile.plan == 'FREE' %}bg-gray-100 text-gray-600 border-gray-200{% else %}bg-purple-100 text-purple-700 border-purple-200{% endif %}">PRO</span>
+        </h2>
+
+        <form method="POST" class="bg-purple-50/50 p-5 rounded-lg border border-purple-100 relative {% if request.user.profile.plan == 'FREE' %}opacity-75 grayscale{% endif %}">
+            {% csrf_token %}
+            {% if request.user.profile.plan == 'FREE' %}
+            <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/40 backdrop-blur-[1px] rounded-lg">
+                <p class="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 font-bold text-sm text-gray-700">Simula el plan PRO en tu Dashboard para desbloquear</p>
+            </div>
+            {% endif %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-0">
+                <div>
+                    <label class="text-xs font-bold text-gray-700 uppercase block mb-2 tracking-wide">{{ pro_form.buffer_time_minutes.label }}</label>
+                    {{ pro_form.buffer_time_minutes }}
+                    <p class="text-[11px] text-gray-500 mt-1">Tiempo bloqueado automáticamente después de cada cita para limpieza o descanso.</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-700 uppercase block mb-2 tracking-wide">{{ pro_form.lunch_start_time.label }}</label>
+                    {{ pro_form.lunch_start_time }}
+                    <p class="text-[11px] text-gray-500 mt-1">Deja vacío si no tienes un bloque fijo.</p>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-700 uppercase block mb-2 tracking-wide">{{ pro_form.lunch_end_time.label }}</label>
+                    {{ pro_form.lunch_end_time }}
+                </div>
+            </div>
+
+            <div class="mt-5 text-right relative z-0">
+                <button type="submit" name="submit_pro" class="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-all font-semibold shadow-sm active:scale-95" {% if request.user.profile.plan == 'FREE' %}disabled{% endif %}>
+                    Guardar Configuración
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>

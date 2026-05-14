@@ -68,6 +68,14 @@
                 </div>
             </div>
 
+            <!-- SIMULADOR PLAN -->
+            <form method="POST" action="{% url 'toggle_plan' %}" class="hidden sm:block mr-2">
+                {% csrf_token %}
+                <button type="submit" class="text-xs font-bold px-3 py-2 rounded-lg border {% if profile.plan == 'PRO' %}bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100{% else %}bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100{% endif %} transition-colors shadow-sm" title="Modo Simulación">
+                    Simular {% if profile.plan == 'PRO' %}FREE{% else %}PRO{% endif %}
+                </button>
+            </form>
+
             {% if user.profile.profile_picture %}
             <div class="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shadow-sm overflow-hidden">
                  <img src="{{ user.profile.profile_picture.url }}" alt="Avatar" class="w-full h-full object-cover">

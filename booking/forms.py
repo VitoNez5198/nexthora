@@ -119,6 +119,12 @@ class ProfessionalProfileForm(forms.ModelForm):
             'facebook_url': 'Página de Facebook',
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and getattr(self.instance, 'plan', 'FREE') != 'FREE':
+            self.fields['slug'].widget.attrs.pop('readonly', None)
+            self.fields['slug'].widget.attrs['class'] = 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all text-gray-900 bg-white'
+
     def clean_slug(self):
         slug = self.cleaned_data.get('slug')
         if slug:
@@ -219,3 +225,30 @@ class TimeOffForm(forms.ModelForm):
         end = cleaned_data.get("end_date")
         if start and end and start > end:
             raise forms.ValidationError("La fecha de fin no puede ser anterior al inicio.")
+        return cleaned_data
+
+# --- FORMULARIO DE CONFIGURACIÓN PRO ---
+class ProScheduleSettingsForm(forms.ModelForm):
+    class Meta:
+        model = ProfessionalProfile
+        fields = ['buffer_time_minutes', 'lunch_start_time', 'lunch_end_time']
+        widgets = {
+            'buffer_time_minutes': forms.NumberInput(attrs={'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600 outline-none', 'min': 0, 'max': 120}),
+            'lunch_start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600 outline-none'}),
+            'lunch_end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-600 focus:border-blue-600 outline-none'}),
+        }
+        labels = {
+            'buffer_time_minutes': 'Descanso entre citas (min)',
+            'lunch_start_time': 'Inicio de Colación',
+            'lunch_end_time': 'Fin de Colación',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start = cleaned_data.get("lunch_start_time")
+        end = cleaned_data.get("lunch_end_time")
+        if start and end and start >= end:
+            raise forms.ValidationError("La hora de fin de colación debe ser después del inicio.")
+        if (start and not end) or (end and not start):
+            raise forms.ValidationError("Debes especificar tanto el inicio como el fin de la colación, o dejar ambos vacíos.")
+        return cleaned_data

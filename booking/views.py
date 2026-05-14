@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta, date, time
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
 
-from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm, AccountSettingsForm
+from .forms import NexthoraUserCreationForm, ServiceForm, BatchScheduleForm, TimeOffForm, ProfessionalProfileForm, AccountSettingsForm, ProScheduleSettingsForm
 from .models import Service, ProfessionalProfile, BusinessHours, TimeOff, Appointment
 
 # --- ACTUALIZADO: Ahora muestra la Landing Page en vez de redirigir al Login ---
@@ -67,6 +67,19 @@ def toggle_profile_visibility(request):
         profile.save()
         return JsonResponse({'success': True, 'is_active': profile.is_active})
     return JsonResponse({'success': False}, status=400)
+
+@login_required
+def toggle_plan_view(request):
+    profile = request.user.profile
+    if request.method == 'POST':
+        if profile.plan == 'FREE':
+            profile.plan = 'PRO'
+        else:
+            profile.plan = 'FREE'
+        profile.save()
+        messages.success(request, f"¡Modo simulación activado! Tu plan actual es {profile.get_plan_display()}")
+    referer = request.META.get('HTTP_REFERER', 'dashboard')
+    return redirect(referer)
 
 @login_required
 def account_settings_view(request):
@@ -135,11 +148,11 @@ def services_view(request):
     profile = request.user.profile
     services = Service.objects.filter(professional=profile).order_by('name')
     services_count = services.count()
-    SERVICE_LIMIT = 2
+    SERVICE_LIMIT = 2 if profile.plan == 'FREE' else 999
 
     if request.method == 'POST':
         if services_count >= SERVICE_LIMIT:
-            messages.error(request, f"Límite alcanzado ({SERVICE_LIMIT}). Elimina un servicio para crear otro.")
+            messages.error(request, f"Límite alcanzado ({SERVICE_LIMIT}). Mejora tu plan para crear más servicios.")
             return redirect('services')
 
         form = ServiceForm(request.POST)
@@ -191,6 +204,7 @@ def schedule_view(request):
     profile = request.user.profile
     hours_form = BatchScheduleForm(prefix='hours')
     timeoff_form = TimeOffForm(prefix='off')
+    pro_form = ProScheduleSettingsForm(instance=profile, prefix='pro')
 
     if request.method == 'POST':
         if 'submit_hours' in request.POST:
@@ -215,10 +229,20 @@ def schedule_view(request):
                 off.save()
                 messages.success(request, "Días bloqueados correctamente.")
                 return redirect('schedule')
+                
+        elif 'submit_pro' in request.POST:
+            if profile.plan == 'FREE':
+                messages.error(request, "Las opciones avanzadas son exclusivas de los planes PRO.")
+                return redirect('schedule')
+            pro_form = ProScheduleSettingsForm(request.POST, instance=profile, prefix='pro')
+            if pro_form.is_valid():
+                pro_form.save()
+                messages.success(request, "Configuración avanzada guardada con éxito.")
+                return redirect('schedule')
 
     schedule = BusinessHours.objects.filter(professional=profile).order_by('weekday', 'start_time')
     time_off_list = TimeOff.objects.filter(professional=profile).order_by('start_date')
-    return render(request, 'schedule.html', {'hours_form': hours_form, 'timeoff_form': timeoff_form, 'schedule': schedule, 'time_off_list': time_off_list})
+    return render(request, 'schedule.html', {'hours_form': hours_form, 'timeoff_form': timeoff_form, 'pro_form': pro_form, 'schedule': schedule, 'time_off_list': time_off_list})
 
 @login_required
 def delete_schedule_view(request, schedule_id):
@@ -290,23 +314,38 @@ def get_available_slots(profile, service, check_date):
     end_work_time = datetime.combine(check_date, work_hours.end_time)
     now = timezone.localtime(timezone.now())
     duration = timedelta(minutes=service.duration_minutes)
+    
+    buffer = timedelta(minutes=profile.buffer_time_minutes) if profile.plan != 'FREE' else timedelta(minutes=0)
+    
+    has_lunch = False
+    if profile.plan != 'FREE' and profile.lunch_start_time and profile.lunch_end_time:
+        lunch_start = datetime.combine(check_date, profile.lunch_start_time)
+        lunch_end = datetime.combine(check_date, profile.lunch_end_time)
+        has_lunch = True
 
     while current_time + duration <= end_work_time:
         slot_start = current_time
         slot_end = current_time + duration
-        if check_date == now.date() and slot_start.time() < now.time():
-            current_time += duration
+        
+        if has_lunch and (slot_start < lunch_end and slot_end > lunch_start):
+            current_time = lunch_end
             continue
+
+        if check_date == now.date() and slot_start.time() < now.time():
+            current_time += duration + buffer
+            continue
+            
         is_taken = False
         for appt in existing_appointments:
             appt_start = timezone.localtime(appt.start_datetime).replace(tzinfo=None)
-            appt_end = timezone.localtime(appt.end_datetime).replace(tzinfo=None)
-            if slot_start < appt_end and slot_end > appt_start:
+            appt_end_with_buffer = timezone.localtime(appt.end_datetime).replace(tzinfo=None) + buffer
+            if slot_start < appt_end_with_buffer and slot_end > appt_start:
                 is_taken = True
                 break
+                
         if not is_taken:
             slots.append(current_time.time())
-        current_time += duration 
+        current_time += duration + buffer 
     return slots
 
 def profile_view(request, profile_slug):

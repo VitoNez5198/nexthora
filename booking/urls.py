@@ -13,6 +13,7 @@ urlpatterns = [
 
     path('dashboard/profile/', views.profile_setup_view, name='profile_setup'),
     path('dashboard/profile/toggle/', views.toggle_profile_visibility, name='toggle_profile_visibility'),
+    path('dashboard/profile/toggle-plan/', views.toggle_plan_view, name='toggle_plan'),
     path('dashboard/settings/', views.account_settings_view, name='account_settings'), 
 
     path('dashboard/services/', views.services_view, name='services'), 

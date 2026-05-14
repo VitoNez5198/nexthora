@@ -23,6 +23,19 @@ class ProfessionalProfile(models.Model):
     
     # NUEVO: Número de WhatsApp
     whatsapp_number = models.CharField(max_length=20, blank=True, null=True, help_text="Tu número de WhatsApp para contacto.")
+    
+    # NUEVO: Planes de Suscripción
+    PLAN_CHOICES = [
+        ('FREE', 'Básico'),
+        ('PRO', 'Profesional'),
+        ('BUSINESS', 'Business+'),
+    ]
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES, default='FREE', help_text="Plan de suscripción actual.")
+    
+    # NUEVO: Bloques de descanso y colación (Características PRO)
+    buffer_time_minutes = models.IntegerField(default=0, help_text="Minutos de descanso entre citas.")
+    lunch_start_time = models.TimeField(blank=True, null=True, help_text="Hora de inicio de colación.")
+    lunch_end_time = models.TimeField(blank=True, null=True, help_text="Hora de fin de colación.")
 
     def __str__(self):
         return self.user.username
