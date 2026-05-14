@@ -80,6 +80,23 @@
         </div>
     </header>
 
+    <!-- BLOQUE PRÓXIMA CITA -->
+    {% if next_appointment %}
+    <div class="mb-6 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl p-4 md:p-5 shadow-lg shadow-blue-600/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border border-blue-500">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div>
+                <p class="text-xs font-black text-blue-200 uppercase tracking-wider mb-0.5">Próxima Cita Entrante</p>
+                <p class="text-base sm:text-lg font-bold text-white leading-tight">{{ next_appointment.client_name }} • {{ next_appointment.service.name }}</p>
+                <p class="text-sm text-blue-100 font-medium mt-0.5">Hoy a las {{ next_appointment.start_datetime|time:"H:i" }}</p>
+            </div>
+        </div>
+        <a href="#cita-{{ next_appointment.id }}" class="bg-white text-blue-700 text-sm font-bold px-4 py-2 rounded-lg shadow-sm hover:bg-gray-50 transition-colors whitespace-nowrap text-center sm:w-auto w-full">Ver detalle</a>
+    </div>
+    {% endif %}
+
     <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative overflow-hidden group">
             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Citas de Hoy</h3>
@@ -139,8 +156,8 @@
                 <form id="form-confirm-{{ cita.id }}" method="POST" action="{% url 'update_appointment_status' cita.id 'CONFIRMED' %}" class="hidden">{% csrf_token %}</form>
                 <form id="form-cancel-{{ cita.id }}" method="POST" action="{% url 'update_appointment_status' cita.id 'CANCELLED_BY_PRO' %}" class="hidden">{% csrf_token %}</form>
 
-                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow relative group">
-                    <div class="absolute left-0 top-0 bottom-0 w-1 {% if cita.status == 'PENDING' %}bg-yellow-400{% else %}bg-green-500{% endif %}"></div>
+                <div id="cita-{{ cita.id }}" class="rounded-xl border overflow-hidden transition-all relative group scroll-mt-20 {% if cita.status == 'PENDING' %}border-amber-300 bg-amber-50/50 shadow-sm{% elif cita.id == next_appointment.id %}border-blue-400 bg-blue-50/30 shadow-md ring-1 ring-blue-400{% else %}bg-white border-gray-200 hover:shadow-md{% endif %}">
+                    <div class="absolute left-0 top-0 bottom-0 w-1 {% if cita.status == 'PENDING' %}bg-amber-400{% elif cita.id == next_appointment.id %}bg-blue-500{% else %}bg-green-500{% endif %}"></div>
                     
                     <!-- PARTE PRINCIPAL DE LA TARJETA -->
                     <div class="p-5 flex items-start sm:items-center gap-4">
@@ -173,7 +190,11 @@
                         <!-- Bloque Derecha: Hora, Badge y Botón de Detalles -->
                         <div class="text-right flex flex-col items-end flex-shrink-0">
                             <div class="text-base font-bold text-gray-900">{{ cita.start_datetime|time:"H:i" }}</div>
-                            {% if cita.status == 'CONFIRMED' %}
+                            {% if cita.status == 'PENDING' %}
+                            <div class="text-[11px] font-bold text-amber-700 mt-1 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-200 mb-2 flex items-center gap-1 animate-pulse"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg> Por Confirmar</div>
+                            {% elif cita.id == next_appointment.id %}
+                            <div class="text-[11px] font-bold text-blue-700 mt-1 bg-blue-100 px-2 py-0.5 rounded-full border border-blue-200 mb-2">En Breve</div>
+                            {% elif cita.status == 'CONFIRMED' %}
                             <div class="text-[11px] font-bold text-green-600 mt-1 bg-green-50 px-2 py-0.5 rounded-full border border-green-200 mb-2">Confirmada</div>
                             {% endif %}
                             

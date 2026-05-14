@@ -7,183 +7,321 @@
 
 {% block content %}
 <!-- NAVBAR PÚBLICO -->
-<nav class="absolute top-0 left-0 w-full z-50 bg-white/60 backdrop-blur-xl border-b border-gray-200/50">
+<nav class="absolute top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-20">
             <!-- Logo -->
             <div class="flex-shrink-0 flex items-center">
                 <img class="h-10 w-auto" src="{% static 'logo.webp' %}" alt="Nexthora">
-                <span class="ml-2 font-display font-black text-xl tracking-tight text-gray-900 hidden sm:block">Nexthora</span>
             </div>
             <!-- Enlaces (Desktop) -->
-            <div class="hidden md:flex space-x-10">
-                <a href="#beneficios" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors">Beneficios</a>
-                <a href="#planes" class="text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors">Planes</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#beneficios" class="text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors">Beneficios</a>
+                <a href="#planes" class="text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors">Planes</a>
+                <a href="#testimonios" class="text-sm font-bold text-gray-500 hover:text-blue-600 transition-colors">Testimonios</a>
             </div>
             <!-- Botones CTA -->
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
                 <a href="{% url 'login' %}" class="hidden sm:block text-sm font-bold text-gray-700 hover:text-blue-600 transition-colors">Iniciar Sesión</a>
-                <a href="{% url 'register' %}" class="bg-gray-900 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-gray-900/20 hover:bg-gray-800 hover:-translate-y-0.5 transition-all">Empezar Gratis</a>
+                <a href="{% url 'register' %}" class="bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95">Comenzar Gratis</a>
             </div>
         </div>
     </div>
 </nav>
 
-<!-- HERO SECTION -->
-<section class="relative min-h-[90vh] flex flex-col justify-center pt-32 pb-20 overflow-hidden bg-[#FAFAFA]">
-    <!-- Elementos Decorativos de Fondo (Blobs) -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-5xl h-full overflow-hidden z-0 pointer-events-none">
-        <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-400/20 blur-[100px]"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-400/20 blur-[120px]"></div>
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center flex-1 flex flex-col justify-center items-center">
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-gray-200 text-gray-700 text-xs font-bold mb-8 shadow-sm">
-            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> 
-            Únete a +1,000 profesionales independientes
+<!-- HERO SECTION (Portada) -->
+<section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-blue-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+        
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-bold mb-6 border border-blue-200">
+            <span class="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span> Ya somos más de 1,000 profesionales
         </span>
 
-        <h1 class="text-5xl md:text-7xl font-display font-black text-gray-900 tracking-tighter mb-6 max-w-4xl mx-auto leading-[1.1]">
-            Automatiza tu agenda. <br class="hidden md:block" />
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">Multiplica tus ingresos.</span>
+        <h1 class="text-5xl md:text-6xl font-display font-black text-gray-900 tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
+            El asistente virtual para tu <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">agenda profesional</span>
         </h1>
         
-        <p class="text-lg md:text-xl text-gray-500 mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
-            Tu enlace personal para recibir reservas 24/7. Nexthora se encarga de confirmar, organizar y enviar recordatorios por WhatsApp para que tú solo te dediques a tu talento.
+        <p class="text-lg md:text-xl text-gray-500 mb-10 max-w-2xl mx-auto font-medium">
+            Deja de perder tiempo respondiendo mensajes. Con Nexthora, tus clientes agendan su hora, reciben recordatorios por WhatsApp y tú te dedicas a hacer crecer tu negocio.
         </p>
 
-        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full">
-            <a href="{% url 'register' %}" class="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white font-bold rounded-2xl shadow-xl shadow-blue-600/30 hover:bg-blue-700 hover:shadow-blue-600/40 hover:-translate-y-1 transition-all text-lg flex items-center justify-center gap-2">
-                Crear mi link gratis 
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="{% url 'register' %}" class="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-600/30 hover:bg-blue-700 hover:-translate-y-1 transition-all text-lg flex items-center justify-center gap-2">
+                Crear mi link gratis <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
             </a>
-            <a href="#planes" class="w-full sm:w-auto px-8 py-4 bg-white text-gray-800 font-bold rounded-2xl shadow-sm border border-gray-200 hover:bg-gray-50 hover:-translate-y-1 transition-all text-lg flex items-center justify-center">
-                Ver características
+            <a href="#planes" class="w-full sm:w-auto px-8 py-4 bg-white text-gray-700 font-bold rounded-xl shadow-sm border border-gray-200 hover:bg-gray-50 transition-all text-lg">
+                Ver Planes PRO
             </a>
         </div>
     </div>
 </section>
 
-<!-- BENEFICIOS -->
-<section id="beneficios" class="py-24 bg-white relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center max-w-3xl mx-auto mb-20">
-            <h2 class="text-3xl md:text-5xl font-bold font-display text-gray-900 mb-6 tracking-tight">El estándar profesional</h2>
-            <p class="text-gray-500 font-medium text-lg md:text-xl">Todo lo que necesitas para operar como una gran empresa, desde tu celular.</p>
+<!-- BENEFICIOS SECTION -->
+<section id="beneficios" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold font-display text-gray-900 mb-4">Todo lo que necesitas en un solo lugar</h2>
+            <p class="text-gray-500 font-medium text-lg">Olvídate del papel, los mensajes perdidos y las inasistencias de último minuto.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- Card 1 -->
-            <div class="group bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-300">
-                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
+                <div class="w-14 h-14 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4 font-display">Enlace Personalizado</h3>
-                <p class="text-gray-500 text-base font-medium leading-relaxed">
-                    Un sitio web instantáneo <b>nexthora.com/tu-nombre</b>. Agrégalo a tu perfil de Instagram para que tus clientes vean tus servicios y disponibilidad en tiempo real.
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Tu "Link en Bio" Oficial</h3>
+                <p class="text-gray-500 text-sm font-medium leading-relaxed">
+                    Obtén un enlace único (nexthora.com/tu-nombre) para poner en tu Instagram. Muestra tus servicios, precios y disponibilidad en tiempo real.
                 </p>
             </div>
             <!-- Card 2 -->
-            <div class="group bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-green-900/5 transition-all duration-300">
-                <div class="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
+                <div class="w-14 h-14 bg-green-100 text-green-600 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4 font-display">Notificaciones WhatsApp</h3>
-                <p class="text-gray-500 text-base font-medium leading-relaxed">
-                    Adiós a las inasistencias. Enviamos confirmaciones automáticas y recordatorios 24h antes de la cita para asegurar que tus clientes siempre asistan.
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Notificaciones WhatsApp</h3>
+                <p class="text-gray-500 text-sm font-medium leading-relaxed">
+                    Tus clientes reciben mensajes automáticos al agendar y recordatorios 24 horas antes de su cita para reducir las ausencias a cero.
                 </p>
             </div>
             <!-- Card 3 -->
-            <div class="group bg-white rounded-3xl p-8 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-purple-900/5 transition-all duration-300">
-                <div class="w-16 h-16 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <div class="bg-gray-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg transition-shadow">
+                <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center mb-6">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-                <h3 class="text-2xl font-bold text-gray-900 mb-4 font-display">Anti-Colisiones</h3>
-                <p class="text-gray-500 text-base font-medium leading-relaxed">
-                    Configura tus horarios, bloquea días libres y el sistema cruzará tus reglas para ofrecer solo los espacios realmente disponibles. Jamás se cruzarán dos citas.
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Control Total</h3>
+                <p class="text-gray-500 text-sm font-medium leading-relaxed">
+                    Bloquea días libres, configura tus horarios de almuerzo y gestiona tu calendario completo desde un Dashboard diseñado para móviles.
                 </p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- PLANES -->
-<section id="planes" class="py-24 bg-gray-950 relative overflow-hidden">
-    <!-- Glow de fondo -->
-    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg h-[500px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none z-0"></div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div class="text-center max-w-3xl mx-auto mb-20">
-            <h2 class="text-3xl md:text-5xl font-bold font-display text-white mb-6 tracking-tight">Precios simples y transparentes</h2>
-            <p class="text-gray-400 font-medium text-lg">Inicia gratis, escala cuando estés listo.</p>
+<!-- SECCIÓN DE PLANES / PRICING -->
+<section id="planes" class="py-24 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl md:text-4xl font-bold font-display text-gray-900 mb-4">Planes diseñados para crecer contigo</h2>
+            <p class="text-gray-500 font-medium text-lg">Empieza gratis hoy y mejora tu plan cuando tu negocio lo necesite.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             
             <!-- PLAN FREE -->
-            <div class="bg-gray-900/80 backdrop-blur-xl rounded-[2.5rem] p-10 border border-gray-800 hover:border-gray-700 transition-colors flex flex-col relative z-10 shadow-2xl shadow-black/50">
-                <h3 class="text-2xl font-bold text-white mb-2 font-display">Plan Básico</h3>
-                <p class="text-gray-400 text-sm mb-8 font-medium">Ideal para empezar a profesionalizar tu negocio.</p>
-                <div class="mb-8">
-                    <span class="text-5xl font-black text-white">$0</span>
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 flex flex-col relative">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Básico</h3>
+                <p class="text-gray-500 text-sm mb-6 font-medium">Perfecto para empezar a organizar.</p>
+                <div class="mb-6">
+                    <span class="text-4xl font-black text-gray-900">$0</span>
                     <span class="text-gray-500 font-medium">/ para siempre</span>
                 </div>
-                <ul class="space-y-5 mb-10 flex-1">
-                    <li class="flex items-center gap-4 text-gray-300 font-medium">
-                        <div class="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                        1 Enlace público personalizado
+                <ul class="space-y-4 mb-8 flex-1">
+                    <li class="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 1 Enlace público personalizado
                     </li>
-                    <li class="flex items-center gap-4 text-gray-300 font-medium">
-                        <div class="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                        Hasta 2 servicios activos
+                    <li class="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Hasta 2 servicios activos
                     </li>
-                    <li class="flex items-center gap-4 text-gray-300 font-medium">
-                        <div class="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center"><svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                        Gestión de agenda y horarios
+                    <li class="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Gestión de agenda básica
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-400 font-medium">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg> <span class="line-through">Recordatorios automáticos</span>
                     </li>
                 </ul>
-                <a href="{% url 'register' %}" class="w-full py-4 bg-gray-800 text-white rounded-2xl font-bold text-center hover:bg-gray-700 transition-colors">Crear Cuenta Gratis</a>
+                <a href="{% url 'register' %}" class="w-full py-3 bg-gray-100 text-gray-800 rounded-xl font-bold text-center hover:bg-gray-200 transition-colors">Empezar Gratis</a>
             </div>
 
-            <!-- PLAN PRO -->
-            <div class="bg-gradient-to-b from-blue-600 to-indigo-900 rounded-[2.5rem] p-10 border border-blue-400/30 shadow-[0_0_50px_-12px_rgba(59,130,246,0.5)] flex flex-col relative z-20 transform md:-translate-y-4">
-                <div class="absolute -top-4 right-8 bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-950 text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg">El favorito</div>
-                <h3 class="text-2xl font-bold text-white mb-2 font-display">Plan PRO</h3>
-                <p class="text-blue-200 text-sm mb-8 font-medium">Para profesionales que no quieren límites.</p>
-                <div class="mb-8">
-                    <span class="text-5xl font-black text-white">$9.99</span>
-                    <span class="text-blue-300 font-medium">/ mes</span>
+            <!-- PLAN PRO (Destacado) -->
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-8 shadow-xl relative transform md:-translate-y-4 flex flex-col border-4 border-white ring-1 ring-gray-100">
+                <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-xl rounded-tr-xl">Más Popular</div>
+                <h3 class="text-xl font-bold text-white mb-2 flex items-center gap-2">PRO <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></h3>
+                <p class="text-blue-100 text-sm mb-6 font-medium">Para profesionales establecidos.</p>
+                <div class="mb-6">
+                    <span class="text-4xl font-black text-white">$9.99</span>
+                    <span class="text-blue-200 font-medium">/ mes</span>
                 </div>
-                <ul class="space-y-5 mb-10 flex-1">
-                    <li class="flex items-center gap-4 text-white font-medium">
-                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                        <strong>Servicios Ilimitados</strong>
+                <ul class="space-y-4 mb-8 flex-1">
+                    <li class="flex items-center gap-3 text-sm text-white font-medium">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <strong>Servicios ilimitados</strong>
                     </li>
-                    <li class="flex items-center gap-4 text-white font-medium">
-                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                        <strong>Bot Automático en WhatsApp</strong>
+                    <li class="flex items-center gap-3 text-sm text-white font-medium">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <strong>WhatsApp Automático</strong>
                     </li>
-                    <li class="flex items-center gap-4 text-white font-medium">
-                        <div class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center"><svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div>
-                        Sin marca de agua de Nexthora
+                    <li class="flex items-center gap-3 text-sm text-white font-medium">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Sincronización Google Calendar
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-white font-medium">
+                        <svg class="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Sin marca de agua
                     </li>
                 </ul>
-                <a href="{% url 'register' %}" class="w-full py-4 bg-white text-blue-700 rounded-2xl font-bold text-center hover:bg-gray-50 shadow-lg transition-all hover:scale-[1.02] active:scale-95">Obtener PRO</a>
+                <a href="#" onclick="alert('Próximamente disponible. ¡Regístrate en el plan Free para estar al tanto!')" class="w-full py-3 bg-white text-blue-700 rounded-xl font-bold text-center hover:bg-gray-50 shadow-sm transition-colors">Obtener PRO (Pronto)</a>
             </div>
 
+            <!-- PLAN BUSINESS -->
+            <div class="bg-white rounded-3xl p-8 shadow-sm border border-gray-200 flex flex-col relative">
+                <h3 class="text-xl font-bold text-gray-900 mb-2">Business+</h3>
+                <p class="text-gray-500 text-sm mb-6 font-medium">Para locales con varios profesionales.</p>
+                <div class="mb-6">
+                    <span class="text-4xl font-black text-gray-900">$24.99</span>
+                    <span class="text-gray-500 font-medium">/ mes</span>
+                </div>
+                <ul class="space-y-4 mb-8 flex-1">
+                    <li class="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Todo lo del plan PRO
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> <strong>Hasta 5 miembros de Staff</strong>
+                    </li>
+                    <li class="flex items-center gap-3 text-sm text-gray-600 font-medium">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Cobro de Señas (MercadoPago)
+                    </li>
+                </ul>
+                <a href="#" onclick="alert('Próximamente disponible. ¡Regístrate en el plan Free para estar al tanto!')" class="w-full py-3 bg-white text-indigo-600 border-2 border-indigo-100 rounded-xl font-bold text-center hover:bg-indigo-50 transition-colors">Contactar Ventas</a>
+            </div>
+
+        </div>
+
+        <!-- BOTÓN PARA DESPLEGAR TABLA -->
+        <div class="mt-16 text-center">
+            <button onclick="document.getElementById('comparison-table').classList.toggle('hidden')" class="inline-flex items-center gap-2 text-blue-600 font-bold hover:text-blue-800 transition-colors bg-blue-50 px-6 py-3 rounded-xl border border-blue-100 hover:bg-blue-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                Ver comparación detallada (Próximamente)
+            </button>
+        </div>
+
+        <!-- TABLA COMPARATIVA (Oculta por defecto) -->
+        <div id="comparison-table" class="hidden mt-8 max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[700px]">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="p-5 font-bold text-gray-900 w-1/3">Características</th>
+                        <th class="p-5 font-bold text-center text-gray-900">Básico</th>
+                        <th class="p-5 font-bold text-center text-blue-600">PRO <span class="text-[10px] bg-blue-100 px-2 py-0.5 rounded-full ml-1">Pronto</span></th>
+                        <th class="p-5 font-bold text-center text-indigo-600">Business+ <span class="text-[10px] bg-indigo-100 px-2 py-0.5 rounded-full ml-1">Pronto</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 text-sm">
+                    <!-- Servicios -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Límite de Servicios</td>
+                        <td class="p-5 text-center text-gray-600">Hasta 2</td>
+                        <td class="p-5 text-center text-gray-900 font-bold">Ilimitados</td>
+                        <td class="p-5 text-center text-gray-900 font-bold">Ilimitados</td>
+                    </tr>
+                    <!-- WhatsApp -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Recordatorios WhatsApp</td>
+                        <td class="p-5 text-center text-gray-400">Manuales</td>
+                        <td class="p-5 text-center text-green-600 font-bold">Automatizados</td>
+                        <td class="p-5 text-center text-green-600 font-bold">Automatizados</td>
+                    </tr>
+                    <!-- Tiempos de descanso -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Tiempos de descanso y bloqueos</td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></td>
+                    </tr>
+                    <!-- Sincronización Calendario -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Sincronización de Calendario</td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center text-gray-900 font-bold">Google Calendar</td>
+                        <td class="p-5 text-center text-gray-900 font-bold">Google Calendar</td>
+                    </tr>
+                    <!-- Editar URL -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Personalizar URL (Slug)</td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></td>
+                    </tr>
+                    <!-- Staff -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Miembros de Staff</td>
+                        <td class="p-5 text-center text-gray-600">Solo tú</td>
+                        <td class="p-5 text-center text-gray-600">Solo tú</td>
+                        <td class="p-5 text-center text-gray-900 font-bold">Hasta 5 miembros</td>
+                    </tr>
+                    <!-- Cobro Señas -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Cobro de Señas (MercadoPago)</td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></td>
+                    </tr>
+                    <!-- Analíticas -->
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-5 font-medium text-gray-700">Métricas e Ingresos (Dashboard)</td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></td>
+                        <td class="p-5 text-center"><svg class="w-5 h-5 mx-auto text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- TESTIMONIOS -->
+<section id="testimonios" class="py-24 bg-white border-t border-gray-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold font-display text-gray-900 mb-4">Lo que dicen los profesionales</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- Testimonio 1 -->
+            <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 relative">
+                <div class="flex gap-1 mb-4 text-yellow-400">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                </div>
+                <p class="text-gray-600 italic mb-6">"Desde que uso Nexthora, mi tiempo respondiendo WhatsApps bajó a cero. Los clientes agendan solos en la madrugada y yo solo reviso mi celular en la mañana. Cambió mi vida."</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold">A</div>
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-900">Alexander T.</h4>
+                        <p class="text-xs text-gray-500 font-medium">Barbería Studio</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Testimonio 2 -->
+            <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 relative">
+                <div class="flex gap-1 mb-4 text-yellow-400">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>
+                </div>
+                <p class="text-gray-600 italic mb-6">"Puse mi link de Nexthora en mi Instagram y se llenó la agenda de la semana. Me encanta que el plan PRO bloquee mi Google Calendar, así nunca se me cruzan citas con mi vida personal."</p>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center text-pink-700 font-bold">V</div>
+                    <div>
+                        <h4 class="text-sm font-bold text-gray-900">Valentina G.</h4>
+                        <p class="text-xs text-gray-500 font-medium">Tatuadora Independiente</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
 <!-- FOOTER -->
-<footer class="bg-[#050505] pt-16 pb-8 border-t border-gray-900">
+<footer class="bg-gray-900 pt-16 pb-8 border-t border-gray-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-2">
-                <img src="{% static 'logo.webp' %}" alt="Nexthora" class="h-8 w-auto brightness-0 invert opacity-70">
-                <span class="font-display font-bold text-gray-400 text-lg">Nexthora</span>
+                <img src="{% static 'logo.webp' %}" alt="Nexthora" class="h-8 w-auto brightness-0 invert opacity-90">
             </div>
-            <p class="text-gray-600 text-sm font-medium">© {% now "Y" %} Nexthora Suite. Construido para profesionales independientes.</p>
+            <p class="text-gray-400 text-sm font-medium">© {% now "Y" %} Nexthora Suite. Todos los derechos reservados.</p>
         </div>
     </div>
 </footer>
