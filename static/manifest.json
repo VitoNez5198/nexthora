@@ -1,15 +1,22 @@
 {
-  "name": "Nexthora Pro",
+  "name": "Nexthora Professional Suite",
   "short_name": "Nexthora",
-  "start_url": "/dashboard/",
+  "description": "Agenda profesional inteligente",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#F9FAFB",
-  "theme_color": "#004ac6",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/1006/1006509.png", 
+      "src": "/static/icon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/static/img/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
