@@ -134,7 +134,7 @@
     {% endif %}
     {% endwith %}
 
-        <main class="flex-1 w-full max-w-6xl mx-auto px-4 py-8">
+        <main class="{% block main_classes %}flex-1 w-full max-w-6xl mx-auto px-4 py-8{% endblock %}">
             {% if messages %}
             <div class="mb-6 space-y-3">
                 {% for message in messages %}

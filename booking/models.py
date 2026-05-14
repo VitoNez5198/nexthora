@@ -20,6 +20,9 @@ class ProfessionalProfile(models.Model):
     website_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu sitio web o portafolio")
     linkedin_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu perfil de LinkedIn")
     facebook_url = models.URLField(max_length=200, blank=True, null=True, help_text="Link a tu página de Facebook")
+    
+    # NUEVO: Número de WhatsApp
+    whatsapp_number = models.CharField(max_length=20, blank=True, null=True, help_text="Tu número de WhatsApp para contacto.")
 
     def __str__(self):
         return self.user.username

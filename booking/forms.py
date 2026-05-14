@@ -21,10 +21,16 @@ class NexthoraUserCreationForm(UserCreationForm):
         help_text="Tu enlace personalizado. Ej: nexthora.com/tu-negocio",
         label="URL Personalizada"
     )
+    whatsapp_number = forms.CharField(
+        max_length=20, 
+        required=True, 
+        help_text="Número de WhatsApp (Ej: +56912345678)",
+        label="WhatsApp del Negocio"
+    )
     
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = UserCreationForm.Meta.fields + ("email", "display_name", "slug")
+        fields = UserCreationForm.Meta.fields + ("email", "display_name", "slug", "whatsapp_number")
 
     def clean_slug(self):
         slug = self.cleaned_data.get('slug')
@@ -47,6 +53,15 @@ class NexthoraUserCreationForm(UserCreationForm):
             profile = user.profile
             profile.display_name = self.cleaned_data["display_name"]
             profile.slug = self.cleaned_data["slug"]
+            profile.whatsapp_number = self.cleaned_data["whatsapp_number"]
+            
+            # Limpiar WhatsApp para que empiece con +569 o similar
+            clean_number = ''.join(filter(str.isdigit, profile.whatsapp_number))
+            if len(clean_number) == 8:
+                profile.whatsapp_number = f"+569{clean_number}"
+            elif len(clean_number) == 9 and clean_number.startswith('9'):
+                profile.whatsapp_number = f"+56{clean_number}"
+                
             profile.save()
         return user
 
@@ -75,8 +90,9 @@ class ProfessionalProfileForm(forms.ModelForm):
     slug = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
-            'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 
-            'placeholder': 'mi-negocio'
+            'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 bg-gray-50 text-gray-500 outline-none cursor-not-allowed select-none', 
+            'placeholder': 'mi-negocio',
+            'readonly': 'readonly'
         })
     )
 
