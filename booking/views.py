@@ -167,7 +167,7 @@ def services_view(request):
     else:
         form = ServiceForm()
 
-    return render(request, 'services.html', {'form': form, 'services': services, 'services_count': services_count, 'service_limit': SERVICE_LIMIT})
+    return render(request, 'services.html', {'form': form, 'services': services, 'services_count': services_count, 'service_limit': SERVICE_LIMIT, 'profile': profile})
 
 @login_required
 def edit_service_view(request, service_id):
@@ -351,6 +351,8 @@ def get_available_slots(profile, service, check_date):
 def profile_view(request, profile_slug):
     profile = get_object_or_404(ProfessionalProfile, slug=profile_slug)
     services = Service.objects.filter(professional=profile, is_active=True)
+    if profile.plan == 'FREE':
+        services = services[:2]
     return render(request, 'profile.html', {'profile': profile, 'services': services})
 
 def booking_view(request, profile_slug, service_id):

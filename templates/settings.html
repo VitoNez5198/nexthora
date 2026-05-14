@@ -13,6 +13,33 @@
 
     <div class="space-y-8">
         
+        <!-- SECCIÓN 0: PLAN Y SUSCRIPCIÓN -->
+        <section class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Tu Plan Actual: <span class="{% if user.profile.plan == 'PRO' %}text-indigo-600{% else %}text-gray-600{% endif %} font-black">{{ user.profile.plan }}</span>
+                    </h3>
+                    <p class="text-sm text-gray-500">
+                        {% if user.profile.plan == 'PRO' %}
+                        Disfrutas de beneficios ilimitados, configuraciones avanzadas de agenda y link personalizado.
+                        {% else %}
+                        Estás en el plan básico con funcionalidades limitadas. Mejora para hacer crecer tu negocio.
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="flex-shrink-0 w-full sm:w-auto">
+                    <form method="POST" action="{% url 'toggle_plan' %}">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full sm:w-auto px-5 py-2.5 {% if user.profile.plan == 'PRO' %}bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100{% else %}bg-indigo-600 text-white hover:bg-indigo-700{% endif %} font-bold rounded-xl shadow-sm transition-colors text-sm">
+                            Administrar Plan
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+        
         <!-- SECCIÓN 1: DATOS BÁSICOS -->
         <section class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="p-8">

@@ -39,6 +39,16 @@ class ProfessionalProfile(models.Model):
 
     def __str__(self):
         return self.user.username
+
+    @property
+    def pending_appointments(self):
+        # We query the Appointment model here to avoid circular imports if any, but since it's defined later it works fine.
+        from .models import Appointment
+        return Appointment.objects.filter(service__professional=self, status='PENDING').order_by('start_datetime')
+
+    @property
+    def pending_count(self):
+        return self.pending_appointments.count()
     
     def save(self, *args, **kwargs):
         if not self.slug:

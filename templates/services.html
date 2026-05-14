@@ -29,36 +29,43 @@
                     {% endif %}
                 </div>
 
-                {% if services_count < service_limit %} 
-                <form method="POST" action="{% url 'services' %}">
-                    {% csrf_token %}
+                <div class="relative">
+                    {% if services_count >= service_limit and profile.plan == 'FREE' %}
+                    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px] rounded-lg text-center p-4">
+                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-3 shadow-sm">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                        <p class="font-bold text-gray-900 text-sm">Límite alcanzado</p>
+                        <p class="text-xs text-gray-500 mt-1">Mejora tu plan para crear servicios ilimitados.</p>
+                        <form method="POST" action="{% url 'toggle_plan' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mt-4 text-xs font-bold text-blue-600 hover:underline">Simular PRO para desbloquear</button>
+                        </form>
+                    </div>
+                    {% endif %}
 
-                    <div class="space-y-4">
-                        {% for field in form %}
-                        <div>
-                            <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-1">
-                                {{ field.label }}
-                            </label>
-                            {{ field }}
-                            {% for error in field.errors %}
-                            <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                    <form method="POST" action="{% url 'services' %}" class="{% if services_count >= service_limit and profile.plan == 'FREE' %}opacity-40 grayscale pointer-events-none{% endif %}">
+                        {% csrf_token %}
+
+                        <div class="space-y-4">
+                            {% for field in form %}
+                            <div>
+                                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-900 mb-1">
+                                    {{ field.label }}
+                                </label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                <p class="text-xs text-red-600 mt-1">{{ error }}</p>
+                                {% endfor %}
+                            </div>
                             {% endfor %}
                         </div>
-                        {% endfor %}
-                    </div>
 
-                    <button type="submit" class="w-full mt-6 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm active:scale-95">
-                        Agregar Servicio
-                    </button>
-                </form>
-                {% else %}
-                <div class="text-center py-6 bg-gray-50 rounded-lg border border-gray-200">
-                    <p class="text-gray-500 text-sm">
-                        Has alcanzado el límite de servicios. <br>
-                        <span class="font-bold text-gray-900">Elimina uno</span> para crear otro nuevo.
-                    </p>
+                        <button type="submit" class="w-full mt-6 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all font-semibold shadow-sm active:scale-95">
+                            Agregar Servicio
+                        </button>
+                    </form>
                 </div>
-                {% endif %}
             </div>
         </div>
 
@@ -69,6 +76,27 @@
             {% if services %}
             <div class="space-y-4">
                 {% for service in services %}
+                {% if profile.plan == 'FREE' and forloop.counter > 2 %}
+                <!-- SERVICIO BLOQUEADO POR PLAN (Si antes era PRO y ahora es FREE) -->
+                <div class="bg-gray-100 rounded-xl shadow-sm border border-gray-300 p-6 flex justify-between items-center relative overflow-hidden grayscale opacity-75 group">
+                    <div class="absolute inset-0 bg-gray-500/5 z-0"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2">
+                            <h3 class="font-bold text-gray-400 text-lg line-through">{{ service.name }}</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-gray-200 text-gray-600 border-gray-300 uppercase tracking-tighter">Inactivo por Plan</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Este servicio se desactivó porque excediste el límite del Plan Básico (2 servicios).</p>
+                    </div>
+                    <div class="relative z-10 flex items-center gap-2">
+                        <form method="POST" action="{% url 'delete_service' service.id %}" onsubmit="return confirm('¿Eliminar este servicio inactivo?');">
+                            {% csrf_token %}
+                            <button type="submit" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex justify-between items-center group transition-colors {% if not service.is_active %} opacity-75 bg-gray-50 {% else %} hover:border-blue-600 {% endif %}">
                     <div>
                         <div class="flex items-center gap-2">
@@ -112,6 +140,7 @@
                         </form>
                     </div>
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
             {% else %}

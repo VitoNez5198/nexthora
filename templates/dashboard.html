@@ -5,88 +5,10 @@
 {% block content %}
 <div class="max-w-6xl mx-auto py-8 px-4 w-full">
 
-    <header class="flex justify-between items-center mb-8">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Resumen</h1>
-            <p class="text-base text-gray-500 mt-1">Bienvenido de nuevo, {{ user.username }}. Aquí está tu resumen diario.</p>
-        </div>
-        <div class="flex items-center gap-4">
-            
-            <!-- CONTENEDOR RELATIVO PARA LA CAMPANA Y EL POPUP -->
-            <div class="relative" id="notifications-container">
-                <!-- Campana de Notificaciones -->
-                <button onclick="toggleNotifications()" class="relative w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center transition-colors shadow-sm focus:outline-none {% if pending_count > 0 %}text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100{% else %}text-gray-500 hover:bg-gray-50{% endif %}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                    {% if pending_count > 0 %}
-                    <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse"></span>
-                    {% endif %}
-                </button>
-
-                <!-- POPUP DE NOTIFICACIONES (OCULTO POR DEFECTO) -->
-                <div id="notifications-popup" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden transform opacity-0 scale-95 transition-all duration-200 origin-top-right">
-                    <div class="px-5 py-4 border-b border-gray-100 bg-gray-50/80 flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-gray-900">Notificaciones</h3>
-                        {% if pending_count > 0 %}
-                        <span class="bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">{{ pending_count }} nuevas</span>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="max-h-[320px] overflow-y-auto divide-y divide-gray-50">
-                        {% if pending_appointments %}
-                            {% for notif in pending_appointments %}
-                            <a href="{% url 'appointments' %}" class="block px-5 py-4 hover:bg-blue-50/50 transition-colors group">
-                                <div class="flex gap-3">
-                                    <div class="mt-0.5 w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm text-gray-900 leading-snug font-medium">
-                                            <span class="font-bold">{{ notif.client_name }}</span> solicitó agendar 
-                                            <span class="text-blue-600 font-bold">{{ notif.service.name }}</span>
-                                        </p>
-                                        <p class="text-[11px] text-gray-500 mt-1.5 font-bold uppercase tracking-wide">
-                                            Para el {{ notif.start_datetime|date:"d M Y" }} a las {{ notif.start_datetime|time:"H:i" }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                            {% endfor %}
-                        {% else %}
-                            <div class="px-5 py-8 text-center flex flex-col items-center justify-center">
-                                <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-3">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                                </div>
-                                <p class="text-sm text-gray-500 font-medium">Estás al día.</p>
-                                <p class="text-xs text-gray-400 mt-1">No tienes solicitudes pendientes.</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <a href="{% url 'appointments' %}" class="block px-4 py-3 bg-gray-50 border-t border-gray-100 text-center text-xs font-bold text-blue-600 hover:bg-gray-100 transition-colors">
-                        Ver Agenda Completa
-                    </a>
-                </div>
-            </div>
-
-            <!-- SIMULADOR PLAN -->
-            <form method="POST" action="{% url 'toggle_plan' %}" class="hidden sm:block mr-2">
-                {% csrf_token %}
-                <button type="submit" class="text-xs font-bold px-3 py-2 rounded-lg border {% if profile.plan == 'PRO' %}bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100{% else %}bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100{% endif %} transition-colors shadow-sm" title="Modo Simulación">
-                    Simular {% if profile.plan == 'PRO' %}FREE{% else %}PRO{% endif %}
-                </button>
-            </form>
-
-            {% if user.profile.profile_picture %}
-            <div class="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center shadow-sm overflow-hidden">
-                 <img src="{{ user.profile.profile_picture.url }}" alt="Avatar" class="w-full h-full object-cover">
-            </div>
-            {% else %}
-            <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-                 {{ user.username|slice:":1"|upper }}
-            </div>
-            {% endif %}
-        </div>
-    </header>
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Resumen</h1>
+        <p class="text-base text-gray-500 mt-1">Bienvenido de nuevo, {{ user.username }}. Aquí está tu resumen diario.</p>
+    </div>
 
     <!-- BLOQUE PRÓXIMA CITA -->
     {% if next_appointment %}
@@ -133,16 +55,16 @@
             <div class="text-sm font-medium text-gray-900 mb-4 truncate" title="nexthora.com/{{ profile.slug }}">
                 nexthora.com/{{ profile.slug }}
             </div>
-            <div class="flex gap-2 mt-auto items-center">
-                <button onclick="copiarLink()" class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5">
+            <div class="flex flex-wrap gap-2 mt-auto items-center">
+                <button onclick="copiarLink()" class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                     Copiar
                 </button>
-                <a href="{% url 'public_profile' profile.slug %}" target="_blank" class="bg-gray-50 text-gray-700 text-xs font-bold px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors flex items-center gap-1.5">
+                <a href="{% url 'public_profile' profile.slug %}" target="_blank" class="bg-gray-50 text-gray-700 text-xs font-bold px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors flex items-center gap-1.5 flex-1 sm:flex-none justify-center">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                     Ver
                 </a>
-                <span id="copy-msg" class="ml-2 text-xs text-green-600 font-bold opacity-0 transition-opacity duration-300">¡Copiado!</span>
+                <span id="copy-msg" class="w-full sm:w-auto mt-2 sm:mt-0 text-xs text-green-600 font-bold opacity-0 transition-opacity duration-300 text-center sm:text-left">¡Copiado!</span>
             </div>
         </div>
     </section>
@@ -321,31 +243,7 @@
         }
     }
 
-    // JS de Notificaciones
-    function toggleNotifications() {
-        const popup = document.getElementById('notifications-popup');
-        if (popup.classList.contains('hidden')) {
-            popup.classList.remove('hidden');
-            // Timeout pequeño para que la transición CSS de Tailwind funcione
-            setTimeout(() => {
-                popup.classList.remove('opacity-0', 'scale-95');
-                popup.classList.add('opacity-100', 'scale-100');
-            }, 10);
-        } else {
-            popup.classList.remove('opacity-100', 'scale-100');
-            popup.classList.add('opacity-0', 'scale-95');
-            setTimeout(() => { popup.classList.add('hidden'); }, 200);
-        }
-    }
 
-    // Cierra las notificaciones si haces clic en cualquier otro lado
-    document.addEventListener('click', function(event) {
-        const container = document.getElementById('notifications-container');
-        const popup = document.getElementById('notifications-popup');
-        if (!container.contains(event.target) && !popup.classList.contains('hidden')) {
-            toggleNotifications();
-        }
-    });
 
     // Funciones nativas de Estado
     function confirmarCita(e, formId, phone, name, service, dateStr, time) {
