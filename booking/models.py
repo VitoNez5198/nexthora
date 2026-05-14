@@ -12,6 +12,7 @@ class ProfessionalProfile(models.Model):
     display_name = models.CharField(max_length=100, help_text="El nombre de tu negocio.")
     bio = models.TextField(max_length=500, blank=True, null=True, help_text="Describe brevemente tus servicios.")
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True, help_text="Sube una foto de perfil cuadrada.")
+    banner_image = models.ImageField(upload_to='profile_banners/', blank=True, null=True, help_text="Sube un banner para tu perfil público (Solo PRO).")
     
     # NUEVO: Botón de apagado/encendido del perfil público
     is_active = models.BooleanField(default=True, help_text="Si es False, el perfil público mostrará que no está disponible.")

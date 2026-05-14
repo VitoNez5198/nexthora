@@ -152,7 +152,7 @@
     <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             Configuración Avanzada
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border {% if request.user.profile.plan == 'FREE' %}bg-gray-100 text-gray-600 border-gray-200{% else %}bg-purple-100 text-purple-700 border-purple-200{% endif %}">PRO</span>
+            <span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-gradient-to-r from-indigo-500 to-purple-600 text-white tracking-wide shadow-sm uppercase ml-1">PRO</span>
         </h2>
 
         <form method="POST" class="bg-purple-50/50 p-5 rounded-lg border border-purple-100 relative {% if request.user.profile.plan == 'FREE' %}opacity-75 grayscale{% endif %}">

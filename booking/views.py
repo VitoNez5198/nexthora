@@ -132,12 +132,19 @@ def dashboard_view(request):
     
     pending_count = pending_appointments.count()
 
+    current_month = today.replace(day=1)
+    monthly_appointments = Appointment.objects.filter(
+        professional=profile, status='CONFIRMED', start_datetime__gte=current_month
+    )
+    monthly_income = sum(app.service.price for app in monthly_appointments if app.service and app.service.price)
+
     return render(request, 'dashboard.html', {
         'today_appointments': today_appointments,
         'tomorrow_appointments': tomorrow_appointments,
         'next_appointment': next_appointment,
         'pending_appointments': pending_appointments,
         'pending_count': pending_count,
+        'monthly_income': monthly_income,
         'today_date': today,
         'tomorrow_date': tomorrow,
         'profile': profile
@@ -151,9 +158,6 @@ def services_view(request):
     SERVICE_LIMIT = 2 if profile.plan == 'FREE' else 999
 
     if request.method == 'POST':
-        if services_count >= SERVICE_LIMIT:
-            messages.error(request, f"Límite alcanzado ({SERVICE_LIMIT}). Mejora tu plan para crear más servicios.")
-            return redirect('services')
 
         form = ServiceForm(request.POST)
         if form.is_valid():

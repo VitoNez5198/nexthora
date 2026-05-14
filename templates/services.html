@@ -19,32 +19,14 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Nuevo Servicio</h2>
 
-                <!-- CONTADOR FREEMIUM -->
-                <div class="mb-4 p-3 rounded-lg text-sm font-medium flex justify-between items-center border 
-                    {% if services_count >= service_limit %} bg-red-50 text-red-700 border-red-200
-                    {% else %} bg-gray-50 text-gray-700 border-gray-200 {% endif %}">
-                    <span>Usados: {{ services_count }} / {{ service_limit }}</span>
-                    {% if services_count >= service_limit %}
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-red-100 text-red-800 border-red-300">Lleno</span>
-                    {% endif %}
+                <!-- CONTADOR DE SERVICIOS -->
+                <div class="mb-4 p-3 rounded-lg text-sm font-medium flex justify-between items-center border bg-gray-50 text-gray-700 border-gray-200">
+                    <span>Servicios Activos: {{ services_count }}</span>
                 </div>
 
                 <div class="relative">
-                    {% if services_count >= service_limit and profile.plan == 'FREE' %}
-                    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-white/60 backdrop-blur-[1px] rounded-lg text-center p-4">
-                        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-3 shadow-sm">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 00-2 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                        </div>
-                        <p class="font-bold text-gray-900 text-sm">Límite alcanzado</p>
-                        <p class="text-xs text-gray-500 mt-1">Mejora tu plan para crear servicios ilimitados.</p>
-                        <form method="POST" action="{% url 'toggle_plan' %}">
-                            {% csrf_token %}
-                            <button type="submit" class="mt-4 text-xs font-bold text-blue-600 hover:underline">Simular PRO para desbloquear</button>
-                        </form>
-                    </div>
-                    {% endif %}
 
-                    <form method="POST" action="{% url 'services' %}" class="{% if services_count >= service_limit and profile.plan == 'FREE' %}opacity-40 grayscale pointer-events-none{% endif %}">
+                    <form method="POST" action="{% url 'services' %}">
                         {% csrf_token %}
 
                         <div class="space-y-4">
@@ -78,22 +60,29 @@
                 {% for service in services %}
                 {% if profile.plan == 'FREE' and forloop.counter > 2 %}
                 <!-- SERVICIO BLOQUEADO POR PLAN (Si antes era PRO y ahora es FREE) -->
-                <div class="bg-gray-100 rounded-xl shadow-sm border border-gray-300 p-6 flex justify-between items-center relative overflow-hidden grayscale opacity-75 group">
-                    <div class="absolute inset-0 bg-gray-500/5 z-0"></div>
-                    <div class="relative z-10">
-                        <div class="flex items-center gap-2">
-                            <h3 class="font-bold text-gray-400 text-lg line-through">{{ service.name }}</h3>
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold border bg-gray-200 text-gray-600 border-gray-300 uppercase tracking-tighter">Inactivo por Plan</span>
-                        </div>
-                        <p class="text-xs text-gray-400 mt-1">Este servicio se desactivó porque excediste el límite del Plan Básico (2 servicios).</p>
+                <div class="bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-6 flex justify-between items-center relative overflow-hidden opacity-80 group">
+                    <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px] z-10 flex items-center justify-end pr-16 pointer-events-none">
                     </div>
-                    <div class="relative z-10 flex items-center gap-2">
-                        <form method="POST" action="{% url 'delete_service' service.id %}" onsubmit="return confirm('¿Eliminar este servicio inactivo?');">
+                    <div class="relative z-20 w-full flex justify-between items-center">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-gray-500 text-lg">{{ service.name }}</h3>
+                                <span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-gradient-to-r from-indigo-500 to-purple-600 text-white tracking-wide shadow-sm uppercase ml-1">PRO</span>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Este servicio está inactivo porque excede el límite del Plan Básico.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <form method="POST" action="{% url 'toggle_plan' %}" class="pointer-events-auto">
+                                {% csrf_token %}
+                                <button type="submit" class="text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg shadow-sm transition-colors">Desbloquear</button>
+                            </form>
+                            <form method="POST" action="{% url 'delete_service' service.id %}" onsubmit="return confirm('¿Eliminar este servicio inactivo?');" class="pointer-events-auto">
                             {% csrf_token %}
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 transition-colors" title="Eliminar">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
                         </form>
+                    </div>
                     </div>
                 </div>
                 {% else %}
@@ -101,6 +90,9 @@
                     <div>
                         <div class="flex items-center gap-2">
                             <h3 class="font-bold text-gray-900 text-lg">{{ service.name }}</h3>
+                            {% if profile.plan == 'PRO' and forloop.counter > 2 %}
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-black bg-gradient-to-r from-indigo-500 to-purple-600 text-white tracking-wide shadow-sm uppercase ml-1">PRO</span>
+                            {% endif %}
                             {% if not service.is_active %}
                             <span class="px-2.5 py-0.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-600 border-gray-200">Oculto</span>
                             {% endif %}

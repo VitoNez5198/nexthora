@@ -98,9 +98,10 @@ class ProfessionalProfileForm(forms.ModelForm):
 
     class Meta:
         model = ProfessionalProfile
-        fields = ['profile_picture', 'display_name', 'slug', 'bio', 'instagram_url', 'website_url', 'linkedin_url', 'facebook_url']
+        fields = ['profile_picture', 'banner_image', 'display_name', 'slug', 'bio', 'instagram_url', 'website_url', 'linkedin_url', 'facebook_url']
         widgets = {
             'profile_picture': forms.FileInput(attrs={'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer'}),
+            'banner_image': forms.FileInput(attrs={'class': 'w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer'}),
             'display_name': forms.TextInput(attrs={'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'Ej: Alexander Thorne o Consultoría Thorne'}),
             'bio': forms.Textarea(attrs={'class': 'w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all resize-none', 'rows': 4, 'placeholder': 'Comparte tu experiencia, pasión y lo que los clientes pueden esperar...'}),
             'instagram_url': forms.URLInput(attrs={'class': 'w-full px-4 py-3 rounded-r-xl border border-gray-200 focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 outline-none transition-all', 'placeholder': 'https://instagram.com/tu_usuario'}),
@@ -110,6 +111,7 @@ class ProfessionalProfileForm(forms.ModelForm):
         }
         labels = {
             'profile_picture': 'Foto de Perfil',
+            'banner_image': 'Banner de Perfil (PRO)',
             'display_name': 'Nombre Completo / Nombre del Negocio',
             'slug': 'URL Personalizada',
             'bio': 'Sobre ti',

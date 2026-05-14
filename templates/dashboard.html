@@ -27,7 +27,7 @@
     </div>
     {% endif %}
 
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative overflow-hidden group">
             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Citas de Hoy</h3>
             <div class="text-4xl font-bold text-gray-900 mb-2">{{ today_appointments.count }}</div>
@@ -48,6 +48,31 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 {{ tomorrow_date|date:"l d M" }}
             </p>
+        </div>
+
+        <!-- BLOQUE PRO: INGRESOS -->
+        <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative overflow-hidden group">
+            <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-2 relative z-20">
+                Ingresos del Mes
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-black bg-gradient-to-r from-indigo-500 to-purple-600 text-white tracking-wide shadow-sm uppercase ml-1">PRO</span>
+            </h3>
+
+            {% if profile.plan == 'FREE' %}
+            <div class="absolute inset-0 top-10 bg-white/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center">
+                <form method="POST" action="{% url 'toggle_plan' %}" class="pointer-events-auto">
+                    {% csrf_token %}
+                    <button type="submit" class="text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg shadow-sm transition-colors">Simular PRO</button>
+                </form>
+            </div>
+            {% endif %}
+            
+            <div class="{% if profile.plan == 'FREE' %}grayscale opacity-50 select-none pointer-events-none{% endif %} relative z-0">
+                <div class="text-3xl sm:text-4xl font-bold text-green-600 mb-2 truncate">${{ monthly_income|default:"0" }}</div>
+                <p class="text-sm font-medium text-gray-500 flex items-center gap-1.5">
+                    <svg class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    Mes actual
+                </p>
+            </div>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative overflow-hidden border-l-4 border-l-blue-600 flex flex-col">
