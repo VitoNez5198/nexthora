@@ -10,8 +10,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    <link rel="icon" type="image/x-icon" href="{% static 'icon.ico' %}?v=1.4">
-    <link rel="apple-touch-icon" href="{% static 'img/icon-512.png' %}?v=1.4">
+    <link rel="icon" type="image/x-icon" href="{% static 'icon.ico' %}?v=1.5">
+    <link rel="apple-touch-icon" href="{% static 'img/icon-512.png' %}?v=1.5">
 
     <!-- Tailwind CSS -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
@@ -36,13 +36,25 @@
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased">
 
-    {# Bloque de lógica segura para detectar si es vista de gestión o pública #}
+    {# Lógica de navegación robusta #}
     {% if user.is_authenticated %}
-        {% with url_name=request.resolver_match.url_name %}
-            {# Solo mostramos el menú si el usuario está logueado Y NO está en una página de cliente #}
-            {% if url_name != 'public_profile' and url_name != 'booking_step1' and url_name != 'booking_step2' and url_name != 'booking_success' and url_name != 'index' %}
-            
-            <!-- VISTA PARA EL PROFESIONAL (Dashboard, Ajustes, etc.) -->
+        {# Usamos una variable simple para evitar errores si resolver_match es None #}
+        {% if "/book/" in request.path or "/profile/" in request.path and "dashboard" not in request.path or profile_slug in request.path and "dashboard" not in request.path %}
+            <!-- VISTA PÚBLICA (Incluso logueado) -->
+            <main>
+                {% if messages %}
+                    <div class="max-w-7xl mx-auto px-4 mt-4">
+                        {% for message in messages %}
+                            <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm text-sm font-medium">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </main>
+        {% else %}
+            <!-- VISTA DE GESTIÓN (Dashboard, Citas, etc.) -->
             <div class="min-h-screen md:flex">
                 
                 <!-- SIDEBAR ESCRITORIO -->
@@ -53,24 +65,24 @@
                     
                     <nav class="flex-1 px-4 space-y-1 mt-4">
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">Principal</p>
-                        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if url_name == 'dashboard' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
+                        <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if 'dashboard' in request.path and 'appointments' not in request.path and 'services' not in request.path and 'schedule' not in request.path and 'settings' not in request.path and 'profile' not in request.path %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
                             Dashboard
                         </a>
-                        <a href="{% url 'appointments' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if url_name == 'appointments' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
+                        <a href="{% url 'appointments' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if 'appointments' in request.path %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
                             Citas
                         </a>
-                        <a href="{% url 'services' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if url_name == 'services' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
+                        <a href="{% url 'services' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if 'services' in request.path %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
                             Servicios
                         </a>
-                        <a href="{% url 'schedule' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if url_name == 'schedule' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
+                        <a href="{% url 'schedule' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if 'schedule' in request.path %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
                             Horarios
                         </a>
 
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mt-8 mb-2">Mi Cuenta</p>
-                        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if url_name == 'account_settings' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
+                        <a href="{% url 'account_settings' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if 'settings' in request.path %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
                             Ajustes
                         </a>
-                        <a href="{% url 'profile_setup' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if url_name == 'profile_setup' %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
+                        <a href="{% url 'profile_setup' %}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl {% if 'profile' in request.path and 'dashboard' in request.path %}bg-blue-50 text-blue-600{% else %}text-gray-600 hover:bg-gray-50{% endif %} font-semibold transition-all">
                             Editar Perfil
                         </a>
                     </nav>
@@ -85,7 +97,7 @@
                     </div>
                 </aside>
 
-                <!-- HEADER MÓVIL (Dashboard) -->
+                <!-- HEADER MÓVIL -->
                 <header class="md:hidden bg-white border-b border-gray-200 sticky top-0 z-40 w-full">
                     <div class="px-4 h-16 flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -107,13 +119,13 @@
                         </button>
                     </div>
                     <div class="flex-1 overflow-y-auto p-4 space-y-2">
-                        <a href="{% url 'dashboard' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-blue-50">Dashboard</a>
-                        <a href="{% url 'appointments' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-blue-50">Citas</a>
-                        <a href="{% url 'services' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-blue-50">Servicios</a>
-                        <a href="{% url 'schedule' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-blue-50">Horarios</a>
+                        <a href="{% url 'dashboard' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold">Dashboard</a>
+                        <a href="{% url 'appointments' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold">Citas</a>
+                        <a href="{% url 'services' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold">Servicios</a>
+                        <a href="{% url 'schedule' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold">Horarios</a>
                         <hr class="my-4 border-gray-100">
-                        <a href="{% url 'account_settings' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-blue-50">Ajustes</a>
-                        <a href="{% url 'profile_setup' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold hover:bg-blue-50">Editar Perfil</a>
+                        <a href="{% url 'account_settings' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold">Ajustes</a>
+                        <a href="{% url 'profile_setup' %}" class="block px-3 py-3 rounded-xl text-gray-700 font-semibold">Editar Perfil</a>
                     </div>
                     <div class="p-4 border-t border-gray-100">
                         <form action="{% url 'logout' %}" method="POST">
@@ -123,7 +135,7 @@
                     </div>
                 </div>
 
-                <!-- CONTENIDO DASHBOARD -->
+                <!-- CONTENIDO -->
                 <div class="flex-1 md:ml-64 flex flex-col min-h-screen">
                     <main class="flex-1 p-4 md:p-8">
                         {% if messages %}
@@ -137,25 +149,9 @@
                     </main>
                 </div>
             </div>
-
-            {% else %}
-                {# Si es una página pública (Perfil del profesional para el cliente) #}
-                <main>
-                    {% if messages %}
-                        <div class="max-w-7xl mx-auto px-4 mt-4">
-                            {% for message in messages %}
-                                <div class="p-4 rounded-xl bg-white border border-gray-200 shadow-sm text-sm font-medium">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% block content %}{% endblock %}
-                </main>
-            {% endif %}
-        {% endwith %}
+        {% endif %}
     {% else %}
-        <!-- VISTA PÚBLICA PARA USUARIOS NO LOGUEADOS (Landing, Login, Register) -->
+        <!-- VISTA PÚBLICA (LOGOUT O CLIENTE) -->
         <main>
             {% if messages %}
                 <div class="max-w-7xl mx-auto px-4 mt-4">
